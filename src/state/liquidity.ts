@@ -1,6 +1,7 @@
 import {
   FACTORY_ADDRESS,
   Field,
+  NETWORKS_SUPPORTED,
   ROUTER_ADDRESS,
   WETH,
 } from "@/configs/networks";
@@ -277,7 +278,6 @@ export const getOwnerLiquidityPools = async (
             const erc20Contract = getERC20Contract(token, library);
             const erc20Methods = ["name", "symbol", "decimals"];
             const results = await getSingleContractMultipleDataMultipleMethods(
-              chainId,
               library,
               erc20Contract,
               erc20Methods,
@@ -296,7 +296,7 @@ export const getOwnerLiquidityPools = async (
               return;
 
             return new Token(
-              chainId,
+              NETWORKS_SUPPORTED.chainId,
               token,
               _token["decimals"],
               _token["symbol"],

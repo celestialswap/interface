@@ -3,8 +3,10 @@ import MulticallABI from "@/abis/Muticall2.json";
 import PairABI from "@/abis/Pair.json";
 import RouterABI from "@/abis/Router.json";
 import FactoryABI from "@/abis/Factory.json";
+import MasterChiefABI from "@/abis/MasterChief.json";
 import {
   FACTORY_ADDRESS,
+  MASTER_CHIEF_ADDRESS,
   MULTICALL_ADDRESS,
   ROUTER_ADDRESS,
 } from "@/configs/networks";
@@ -87,4 +89,11 @@ export function getFactoryContract(library: Web3Provider, account?: string) {
 
 export function getRouterContract(library: Web3Provider, account?: string) {
   return getContract(ROUTER_ADDRESS, RouterABI, library, account);
+}
+
+export function getMasterChiefContract(
+  library: Web3Provider,
+  account?: string
+) {
+  return getContract(MASTER_CHIEF_ADDRESS, MasterChiefABI, library, account);
 }

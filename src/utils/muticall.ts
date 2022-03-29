@@ -99,7 +99,6 @@ export const getMultipleContractMultipleData = async (
 };
 
 export const getSingleContractMultipleDataMultipleMethods = async (
-  chainId: number,
   library: Web3Provider,
   contract: Contract,
   methodNames: string[],
