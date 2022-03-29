@@ -1,7 +1,7 @@
 import {
-  FACTORY_ADDRESSES,
+  FACTORY_ADDRESS,
   Field,
-  ROUTER_ADDRESSES,
+  ROUTER_ADDRESS,
   WETH,
 } from "@/configs/networks";
 import {
@@ -34,16 +34,15 @@ export const getCurrencyBalances = async (
   currencies: (Token | undefined)[]
 ): Promise<(TokenAmount | CurrencyAmount | undefined)[] | undefined> => {
   try {
-    if (!WETH[chainId] || !currencies.filter((currency) => !!currency).length)
-      return undefined;
+    if (!currencies.filter((currency) => !!currency).length) return undefined;
     const tokens =
       currencies?.filter(
         (currency): currency is Token =>
-          currency instanceof Token && !currency.equals(WETH[chainId])
+          currency instanceof Token && !currency.equals(WETH)
       ) ?? [];
     const containsBNB: boolean = !chainId
       ? false
-      : currencies?.some((currency) => currency === WETH[chainId]) ?? false;
+      : currencies?.some((currency) => currency === WETH) ?? false;
     const ethBalance = await getBNBBalances(
       chainId,
       library,
@@ -58,7 +57,7 @@ export const getCurrencyBalances = async (
     return (
       currencies?.map((currency) => {
         if (!account || !currency || !chainId) return undefined;
-        if (currency === WETH[chainId]) return ethBalance[account];
+        if (currency === WETH) return ethBalance[account];
         if (currency instanceof Token) return tokenBalances[currency.address];
         return undefined;
       }) ?? []
@@ -98,12 +97,11 @@ export const getPoolInfo = async (
   library: Web3Provider,
   currencies: (Token | undefined)[]
 ): Promise<PoolState | undefined> => {
-  if (!WETH[chainId] || !FACTORY_ADDRESSES[chainId]) return undefined;
+  if (!WETH || !FACTORY_ADDRESS) return undefined;
   const [tokenA, tokenB] = currencies;
   if (!tokenA || !tokenB || tokenA.equals(tokenB)) return undefined;
   const computePair = computePairAddress({
-    chainId,
-    factoryAddress: FACTORY_ADDRESSES[chainId],
+    factoryAddress: FACTORY_ADDRESS,
     tokenA,
     tokenB,
   });
@@ -149,7 +147,6 @@ export const getPoolInfo = async (
   };
 };
 export const addLiquidityCallback = async (
-  chainId: number | undefined,
   account: string | null | undefined,
   library: Web3Provider | null,
   tokens: {
@@ -163,14 +160,13 @@ export const addLiquidityCallback = async (
 ) => {
   try {
     if (
-      !chainId ||
       !account ||
       !library ||
       [tokens, amounts].some((e) => !e[Field.INPUT] || !e[Field.OUTPUT])
     )
       return;
 
-    const routerContract = getRouterContract(chainId, library, account);
+    const routerContract = getRouterContract(library, account);
 
     let args,
       overrides = {},
@@ -178,11 +174,11 @@ export const addLiquidityCallback = async (
 
     // addLiquidityETH
     if (
-      tokens[Field.INPUT]?.equals(WETH[chainId]) ||
-      tokens[Field.OUTPUT]?.equals(WETH[chainId])
+      tokens[Field.INPUT]?.equals(WETH) ||
+      tokens[Field.OUTPUT]?.equals(WETH)
     ) {
       methodName = "addLiquidityETH";
-      const inputIsETH = tokens[Field.INPUT]?.equals(WETH[chainId]);
+      const inputIsETH = tokens[Field.INPUT]?.equals(WETH);
       args = [
         (inputIsETH
           ? tokens[Field.OUTPUT]?.address
@@ -229,7 +225,7 @@ export const getOwnerLiquidityPools = async (
   try {
     if (!chainId || !library || !account) return [];
 
-    const factoryContract = getFactoryContract(chainId, library);
+    const factoryContract = getFactoryContract(library);
     const allPairsLength = await callContract(
       factoryContract,
       "allPairsLength",
@@ -349,14 +345,14 @@ export const removeLiquidityCallback = async (
       !chainId ||
       !account ||
       !library ||
-      !WETH[chainId] ||
+      !WETH ||
       removeAmount.lte(BigNumber.from("0"))
     )
       return;
     let token0: Token, token1: Token;
     [token0, token1] = [pair.token0, pair.token1];
 
-    const routerContract = getRouterContract(chainId, library, account);
+    const routerContract = getRouterContract(library, account);
 
     const deadline = Math.floor(Date.now() / 1000) + 30 * 60;
 
@@ -365,9 +361,9 @@ export const removeLiquidityCallback = async (
       methodName: string = "";
 
     // removeLiquidityETH
-    if (token0.equals(WETH[chainId]) || token1.equals(WETH[chainId])) {
+    if (token0.equals(WETH) || token1.equals(WETH)) {
       methodName = "removeLiquidityETH";
-      const token0IsETH = token0.equals(WETH[chainId]);
+      const token0IsETH = token0.equals(WETH);
       args = [
         (token0IsETH ? token1.address : token0.address) ?? "", // token
         removeAmount.toString(), // liquidity remove
@@ -390,16 +386,12 @@ export const removeLiquidityCallback = async (
       ];
     }
     const _pair = computePairAddress({
-      chainId,
-      factoryAddress: FACTORY_ADDRESSES[chainId],
+      factoryAddress: FACTORY_ADDRESS,
       tokenA: token0,
       tokenB: token1,
     });
     const pairContract = getPairContract(_pair, library, account);
-    await callContract(pairContract, "approve", [
-      ROUTER_ADDRESSES[chainId],
-      removeAmount,
-    ]);
+    await callContract(pairContract, "approve", [ROUTER_ADDRESS, removeAmount]);
     return callContract(routerContract, methodName, args, overrides);
   } catch (error) {
     console.error(error);

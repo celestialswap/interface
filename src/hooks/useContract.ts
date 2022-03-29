@@ -4,9 +4,9 @@ import PairABI from "@/abis/Pair.json";
 import RouterABI from "@/abis/Router.json";
 import FactoryABI from "@/abis/Factory.json";
 import {
-  FACTORY_ADDRESSES,
-  MULTICALL_ADDRESSES,
-  ROUTER_ADDRESSES,
+  FACTORY_ADDRESS,
+  MULTICALL_ADDRESS,
+  ROUTER_ADDRESS,
 } from "@/configs/networks";
 import { Contract } from "@ethersproject/contracts";
 import { Web3Provider } from "@ethersproject/providers";
@@ -59,17 +59,8 @@ export async function callStaticContract(
   }
 }
 
-export function getMulticallContract(
-  chainId: number,
-  library: Web3Provider,
-  account?: string
-) {
-  return getContract(
-    MULTICALL_ADDRESSES[chainId],
-    MulticallABI,
-    library,
-    account
-  );
+export function getMulticallContract(library: Web3Provider, account?: string) {
+  return getContract(MULTICALL_ADDRESS, MulticallABI, library, account);
 }
 
 export function getERC20Contract(
@@ -90,18 +81,10 @@ export function getPairContract(
   return getContract(pair, PairABI, library, account);
 }
 
-export function getFactoryContract(
-  chainId: number,
-  library: Web3Provider,
-  account?: string
-) {
-  return getContract(FACTORY_ADDRESSES[chainId], FactoryABI, library, account);
+export function getFactoryContract(library: Web3Provider, account?: string) {
+  return getContract(FACTORY_ADDRESS, FactoryABI, library, account);
 }
 
-export function getRouterContract(
-  chainId: number,
-  library: Web3Provider,
-  account?: string
-) {
-  return getContract(ROUTER_ADDRESSES[chainId], RouterABI, library, account);
+export function getRouterContract(library: Web3Provider, account?: string) {
+  return getContract(ROUTER_ADDRESS, RouterABI, library, account);
 }

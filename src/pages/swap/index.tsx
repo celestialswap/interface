@@ -31,7 +31,7 @@ import {
 } from "@uniswap/sdk";
 import type { NextPage } from "next";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { BIPS_BASE, Field, ROUTER_ADDRESSES } from "@/configs/networks";
+import { BIPS_BASE, Field, ROUTER_ADDRESS } from "@/configs/networks";
 import { parseUnits, formatUnits } from "@ethersproject/units";
 import { approves, getAllowances } from "@/state/erc20";
 import { MdSwapVert } from "react-icons/md";
@@ -118,14 +118,7 @@ const Swap: NextPage = () => {
   ]);
 
   useEffect(() => {
-    if (
-      !account ||
-      !chainId ||
-      !library ||
-      !trade ||
-      !tokens[Field.INPUT] ||
-      !typedValue
-    )
+    if (!account || !library || !trade || !tokens[Field.INPUT] || !typedValue)
       return;
 
     const decimals = tokens[Field.INPUT]?.decimals ?? 18;
@@ -140,16 +133,15 @@ const Swap: NextPage = () => {
           )
         : (trade.inputAmount as TokenAmount);
     getAllowances(
-      chainId,
       library,
       account,
-      ROUTER_ADDRESSES[chainId],
+      ROUTER_ADDRESS,
       [tokens[Field.INPUT]],
       [inputAmount]
     )
       .then(setTokensNeedApproved)
       .catch(console.error);
-  }, [account, library, chainId, trade, tokens, independentField, typedValue]);
+  }, [account, library, trade, tokens, independentField, typedValue]);
 
   const handleOpenModal = (independentField: Field) => {
     setIndependentField(independentField);
@@ -192,25 +184,23 @@ const Swap: NextPage = () => {
   const onSwapCallback = useCallback(async () => {
     try {
       setSubmitting(true);
-      await swapCallback(chainId, library, account, trade, slippage);
+      await swapCallback(library, account, trade, slippage);
       setReloadPool((pre) => !pre);
       setSubmitting(false);
     } catch (error) {
       console.error(error);
       setSubmitting(false);
     }
-  }, [chainId, account, library, trade, slippage]);
+  }, [account, library, trade, slippage]);
 
   const onApproveTokens = useCallback(async () => {
     try {
-      if (!chainId || !account || !library || !ROUTER_ADDRESSES[chainId])
-        return;
+      if (!account || !library) return;
       setSubmitting(true);
       const result = await approves(
-        chainId,
         library,
         account,
-        ROUTER_ADDRESSES[chainId],
+        ROUTER_ADDRESS,
         tokensNeedApproved
       );
       if (result) setTokensNeedApproved([]);
@@ -219,7 +209,7 @@ const Swap: NextPage = () => {
       console.error(error);
       setSubmitting(false);
     }
-  }, [chainId, account, library, tokensNeedApproved]);
+  }, [account, library, tokensNeedApproved]);
 
   const onSubmit = () => {
     if (isNeedApproved) {

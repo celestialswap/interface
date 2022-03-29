@@ -50,7 +50,7 @@ export const getSingleContractMultipleData = async (
             };
           })
         : [];
-    const multicallContract = await getMulticallContract(chainId, library);
+    const multicallContract = await getMulticallContract(library);
     const chunks = await fetchChunk(multicallContract, calls);
     const { results } = chunks;
     return results.map((result) =>
@@ -62,7 +62,6 @@ export const getSingleContractMultipleData = async (
 };
 
 export const getMultipleContractMultipleData = async (
-  chainId: number,
   library: Web3Provider,
   contracts: (Contract | undefined)[],
   methodName: string,
@@ -81,7 +80,7 @@ export const getMultipleContractMultipleData = async (
         ),
       };
     });
-    const multicallContract = await getMulticallContract(chainId, library);
+    const multicallContract = await getMulticallContract(library);
     const chunks = await fetchChunk(multicallContract, calls);
     const { results } = chunks;
     return results.map((result, i) => {
@@ -119,7 +118,7 @@ export const getSingleContractMultipleDataMultipleMethods = async (
         ),
       };
     });
-    const multicallContract = await getMulticallContract(chainId, library);
+    const multicallContract = await getMulticallContract(library);
     const chunks = await fetchChunk(multicallContract, calls);
     const { results } = chunks;
     return results.map((result, i) =>
@@ -154,7 +153,7 @@ export const getMultipleContractMultipleDataMultipleMethods = async (
                 };
               })
             : [];
-        const multicallContract = await getMulticallContract(chainId, library);
+        const multicallContract = await getMulticallContract(library);
         const chunks = await fetchChunk(multicallContract, calls);
         const { results } = chunks;
         return results.map((result) =>

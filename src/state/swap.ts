@@ -117,7 +117,6 @@ export const getDerivedSwapInfo = async ({
  * @param recipientAddressOrName
  */
 export const getSwapCallArguments = async (
-  chainId: number | undefined,
   recipientAddressOrName: string, // the ENS name or address of the recipient of the trade, or null if swap should be returned to sender,
   deadline: number,
   allowedSlippage: number,
@@ -126,14 +125,13 @@ export const getSwapCallArguments = async (
 ) => {
   const recipient = recipientAddressOrName;
 
-  if (!chainId || !trade || !recipient || !deadline || !routerContract)
-    return [];
+  if (!trade || !recipient || !deadline || !routerContract) return [];
 
   const swapMethods = [];
 
   try {
     swapMethods.push(
-      swapCallParameters(chainId, trade as any, {
+      swapCallParameters(trade as any, {
         feeOnTransfer: false,
         allowedSlippage: new Percent(JSBI.BigInt(allowedSlippage), BIPS_BASE),
         recipient,
@@ -142,7 +140,7 @@ export const getSwapCallArguments = async (
     );
     if (trade.tradeType === TradeType.EXACT_INPUT) {
       swapMethods.push(
-        swapCallParameters(chainId, trade as any, {
+        swapCallParameters(trade as any, {
           feeOnTransfer: true,
           allowedSlippage: new Percent(JSBI.BigInt(allowedSlippage), BIPS_BASE),
           recipient,
@@ -161,21 +159,19 @@ export const getSwapCallArguments = async (
 };
 
 export const swapCallback = async (
-  chainId: number | undefined,
   library: Web3Provider | null | undefined,
   account: string | null | undefined, // the ENS name or address of the recipient of the trade, or null if swap should be returned to sender,
   trade: Trade | null, // trade to execute, required
   allowedSlippage: number
 ) => {
   try {
-    if (!chainId || !library || !account || !trade) return;
+    if (!library || !account || !trade) return;
 
-    const routerContract = getRouterContract(chainId, library, account);
+    const routerContract = getRouterContract(library, account);
     const deadline = Math.floor(Date.now() / 1000) + 30 * 60;
 
     // swapCalls arguments
     const swapCalls = await getSwapCallArguments(
-      chainId,
       account,
       deadline,
       Math.floor(allowedSlippage * 100),
@@ -183,8 +179,7 @@ export const swapCallback = async (
       trade
     );
 
-    if (!trade || !account || !chainId || !swapCalls?.length || !routerContract)
-      return;
+    if (!trade || !account || !swapCalls?.length || !routerContract) return;
 
     let {
       parameters: { methodName, args, value },

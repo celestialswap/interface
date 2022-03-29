@@ -27,7 +27,7 @@ import {
 } from "@uniswap/sdk";
 import type { NextPage } from "next";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Field, ROUTER_ADDRESSES } from "@/configs/networks";
+import { Field, ROUTER_ADDRESS } from "@/configs/networks";
 import { parseUnits, formatUnits } from "@ethersproject/units";
 import { approves, getAllowances } from "@/state/erc20";
 
@@ -89,10 +89,9 @@ const AddLiquidity: NextPage = () => {
   useEffect(() => {
     if (!account || !chainId) return;
     getAllowances(
-      chainId,
       library,
       account,
-      ROUTER_ADDRESSES[chainId],
+      ROUTER_ADDRESS,
       [tokens[Field.INPUT], tokens[Field.OUTPUT]],
       [parsedTokenAmounts[Field.INPUT], parsedTokenAmounts[Field.OUTPUT]]
     )
@@ -215,31 +214,23 @@ const AddLiquidity: NextPage = () => {
   const onAddLiquidityCallback = useCallback(async () => {
     try {
       setSubmitting(true);
-      await addLiquidityCallback(
-        chainId,
-        account,
-        library,
-        tokens,
-        parsedTokenAmounts
-      );
+      await addLiquidityCallback(account, library, tokens, parsedTokenAmounts);
       setReloadPool((pre) => !pre);
       setSubmitting(false);
     } catch (error) {
       console.error(error);
       setSubmitting(false);
     }
-  }, [chainId, account, library, tokens, parsedTokenAmounts]);
+  }, [account, library, tokens, parsedTokenAmounts]);
 
   const onApproveTokens = useCallback(async () => {
     try {
-      if (!chainId || !account || !library || !ROUTER_ADDRESSES[chainId])
-        return;
+      if (!account || !library) return;
       setSubmitting(true);
       const result = await approves(
-        chainId,
         library,
         account,
-        ROUTER_ADDRESSES[chainId],
+        ROUTER_ADDRESS,
         tokensNeedApproved
       );
       if (result) setTokensNeedApproved([]);
@@ -248,7 +239,7 @@ const AddLiquidity: NextPage = () => {
       console.error(error);
       setSubmitting(false);
     }
-  }, [chainId, account, library, tokensNeedApproved]);
+  }, [account, library, tokensNeedApproved]);
 
   const onSubmit = () => {
     if (isNeedApproved) {
@@ -376,8 +367,8 @@ const AddLiquidity: NextPage = () => {
               </Box>
             )}
             {poolInfo.totalSupply &&
-              parsedTokenAmounts[Field.INPUT] &&
-              parsedTokenAmounts[Field.OUTPUT] && (
+              parsedTokenAmounts[Field.INPUT]?.raw.toString() !== "0" &&
+              parsedTokenAmounts[Field.OUTPUT]?.raw.toString() !== "0" && (
                 <Box>
                   LP tokens minted:{" "}
                   {poolInfo.totalSupply &&

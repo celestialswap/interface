@@ -97,6 +97,7 @@ const Web3Layout = ({ children }: { children: any }) => {
           <Link href="/">home</Link>
           <Link href="/swap">swap</Link>
           <Link href="/liquidity">liquidity</Link>
+          <Link href="/farm">farm</Link>
         </HStack>
         <Button colorScheme="teal" onClick={() => (account ? null : onOpen())}>
           {account ? formatAddress(account) : "connect wallet"}

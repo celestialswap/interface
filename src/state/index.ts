@@ -2,7 +2,7 @@ import {
   BASES_TO_CHECK_TRADES_AGAINST,
   BETTER_TRADE_LESS_HOPS_THRESHOLD,
   CUSTOM_BASES,
-  FACTORY_ADDRESSES,
+  FACTORY_ADDRESS,
   MAX_TRADE_HOPS,
   ONE_HUNDRED_PERCENT,
   ZERO_PERCENT,
@@ -48,7 +48,7 @@ export const getBNBBalances = async (
 ): Promise<{
   [address: string]: CurrencyAmount | undefined;
 }> => {
-  const multicallContract = await getMulticallContract(chainId, library);
+  const multicallContract = await getMulticallContract(library);
   const addresses: string[] = uncheckedAddresses
     ? uncheckedAddresses
         .map(isAddress)
@@ -88,7 +88,6 @@ export const getTokenBalances = async (
       getERC20Contract(token.address, library)
     );
     const results = await getMultipleContractMultipleData(
-      chainId,
       library,
       tokenContracts,
       "balanceOf",
@@ -161,15 +160,14 @@ export const getPairs = async (
   currencies: Token[][]
 ) => {
   const tokens = currencies.map(([currencyA, currencyB]) => [
-    wrappedCurrency(currencyA, chainId),
-    wrappedCurrency(currencyB, chainId),
+    wrappedCurrency(currencyA),
+    wrappedCurrency(currencyB),
   ]);
 
   const pairAddresses = tokens.map(([tokenA, tokenB]) => {
     return chainId && tokenA && tokenB && !tokenA.equals(tokenB)
       ? computePairAddress({
-          chainId,
-          factoryAddress: FACTORY_ADDRESSES[chainId],
+          factoryAddress: FACTORY_ADDRESS,
           tokenA,
           tokenB,
         })
@@ -180,7 +178,6 @@ export const getPairs = async (
     .map((pair) => getPairContract(pair as string, library));
 
   const results = await getMultipleContractMultipleData(
-    chainId,
     library,
     pairContracts,
     "getReserves",
@@ -227,8 +224,8 @@ export const getAllCommonPairs = async (
   if (!tokenA || !tokenB) return [];
 
   const bases =
-    chainId && BASES_TO_CHECK_TRADES_AGAINST[chainId]
-      ? BASES_TO_CHECK_TRADES_AGAINST[chainId]
+    chainId && BASES_TO_CHECK_TRADES_AGAINST
+      ? BASES_TO_CHECK_TRADES_AGAINST
       : [];
 
   const basePairs = flatMap(bases, (base) =>
@@ -251,7 +248,7 @@ export const getAllCommonPairs = async (
           .filter(([t0, t1]) => t0.address !== t1.address)
           .filter(([tokenA, tokenB]) => {
             if (!chainId) return true;
-            const customBases = CUSTOM_BASES[chainId];
+            const customBases = CUSTOM_BASES;
             if (!customBases) return true;
 
             const customBasesA = customBases[tokenA.address];

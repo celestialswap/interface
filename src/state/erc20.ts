@@ -8,7 +8,6 @@ import { Token, TokenAmount } from "@uniswap/sdk";
 import { CurrencyAmount } from "@uniswap/sdk-core";
 
 export const getAllowances = async (
-  chainId: number,
   library: Web3Provider,
   owner: string,
   spender: string,
@@ -18,12 +17,11 @@ export const getAllowances = async (
   try {
     if (tokens.every((token) => !token)) return [];
     const onlyTokens = tokens.filter(
-      (token) => typeof token !== "undefined" && !token.equals(WETH[chainId])
+      (token) => typeof token !== "undefined" && !token.equals(WETH)
     );
     const onlyTokenAmounts = amounts.filter(
       (_, i) =>
-        typeof tokens[i]?.address !== "undefined" &&
-        !tokens?.[i]?.equals(WETH[chainId])
+        typeof tokens[i]?.address !== "undefined" && !tokens?.[i]?.equals(WETH)
     );
     const erc20Contracts = onlyTokens.map((token) =>
       token?.address
@@ -31,7 +29,6 @@ export const getAllowances = async (
         : undefined
     );
     const results = await getMultipleContractMultipleData(
-      chainId,
       library,
       erc20Contracts,
       "allowance",
@@ -58,7 +55,6 @@ export const getAllowances = async (
 };
 
 export const approves = async (
-  chainId: number,
   library: Web3Provider,
   account: string,
   spender: string,
@@ -66,7 +62,7 @@ export const approves = async (
 ): Promise<boolean> => {
   try {
     const onlyTokens = tokens.filter(
-      (token) => typeof token !== "undefined" && !token.equals(WETH[chainId])
+      (token) => typeof token !== "undefined" && !token.equals(WETH)
     );
     if (!onlyTokens.length) return true;
     const erc20Contracts = tokens.map((token) =>

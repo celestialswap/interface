@@ -81,17 +81,14 @@ export function getContract(
 }
 
 export const computePairAddress = ({
-  chainId,
   factoryAddress,
   tokenA,
   tokenB,
 }: {
-  chainId: number;
   factoryAddress: string;
   tokenA: Token;
   tokenB: Token;
 }): string => {
-  if (!INIT_CODE_HASH[chainId]) return "";
   const [token0, token1] = tokenA.sortsBefore(tokenB)
     ? [tokenA, tokenB]
     : [tokenB, tokenA]; // does safety checks
@@ -101,21 +98,19 @@ export const computePairAddress = ({
       ["bytes"],
       [pack(["address", "address"], [token0.address, token1.address])]
     ),
-    INIT_CODE_HASH[chainId]
+    INIT_CODE_HASH
   );
 };
 
 export const wrappedCurrency = (
-  currency: Token | undefined,
-  chainId: number | undefined
+  currency: Token | undefined
 ): Token | undefined => {
-  return chainId && currency instanceof Token ? currency : undefined;
+  return currency instanceof Token ? currency : undefined;
 };
 
 const ZERO_HEX = "0x0";
 
 export const swapCallParameters = (
-  chainId: number,
   trade: Trade & {
     inputAmount: {
       currency: Token;
@@ -126,9 +121,8 @@ export const swapCallParameters = (
   },
   options: TradeOptions | TradeOptionsDeadline
 ): SwapParameters => {
-  const etherIn = trade.inputAmount.currency.address === WETH[chainId].address;
-  const etherOut =
-    trade.outputAmount.currency.address === WETH[chainId].address;
+  const etherIn = trade.inputAmount.currency.address === WETH.address;
+  const etherOut = trade.outputAmount.currency.address === WETH.address;
   // the router does not support both ether in and out
   invariant(!(etherIn && etherOut), "ETHER_IN_OUT");
   invariant(!("ttl" in options) || options.ttl > 0, "TTL");

@@ -1,4 +1,4 @@
-import { Field, ROUTER_ADDRESSES } from "@/configs/networks";
+import { Field, ROUTER_ADDRESS } from "@/configs/networks";
 import { useActiveWeb3React } from "@/hooks/useActiveWeb3React";
 import { callContract, getPairContract } from "@/hooks/useContract";
 import { PoolState, removeLiquidityCallback } from "@/state/liquidity";

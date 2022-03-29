@@ -2,18 +2,15 @@ import { InjectedConnector } from "@web3-react/injected-connector";
 import { WalletConnectConnector } from "@web3-react/walletconnect-connector";
 import { StaticJsonRpcProvider } from "@ethersproject/providers";
 import sample from "lodash/sample";
-import { RPC_CHAIN_ID, RPC_NODES } from "@/configs/constants";
+import { NETWORKS_SUPPORTED } from "@/configs/networks";
 
 declare var window: any;
-if (!RPC_CHAIN_ID) throw Error("RPC chainId is not configured");
-const chainId: number = parseInt(RPC_CHAIN_ID.toString(), 10);
-const rpcNode: string | undefined = sample(NETWORKS_SUPPORTED.bsc_testnet.rpc);
+const chainId: number = parseInt(NETWORKS_SUPPORTED.chainId.toString(), 10);
+const rpcNode: string | undefined = sample(NETWORKS_SUPPORTED.rpc);
 if (!rpcNode) throw Error("One RPC node is not configured");
 
-import { CHAIN_IDS_SUPPORTED, NETWORKS_SUPPORTED } from "@/configs/networks";
-
 export const injected: InjectedConnector = new InjectedConnector({
-  supportedChainIds: [...CHAIN_IDS_SUPPORTED],
+  supportedChainIds: [chainId],
 });
 
 export const walletconnect: WalletConnectConnector = new WalletConnectConnector(
