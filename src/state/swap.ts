@@ -67,13 +67,6 @@ export const getDerivedSwapInfo = async ({
     currencies;
   if (!inputCurrency || !outputCurrency) return null;
 
-  const allowedPairs = await getAllCommonPairs(
-    library,
-    inputCurrency,
-    outputCurrency
-  );
-  if (!allowedPairs.length) return null;
-
   const isExactIn = independentField === Field.INPUT;
   const parsedAmount = tryParseAmount(
     typedValue.toString(),

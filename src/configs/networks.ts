@@ -63,7 +63,7 @@ export const INIT_CODE_HASH: string =
   "0xaae7dc513491fb17b541bd4a9953285ddf2bb20a773374baecc88c4ebada0767";
 
 export const MASTER_CHIEF_ADDRESS =
-  "0x7D1d89848880465E84654A6e74E181E97aA92dac";
+  "0x45b6bF33BF2135300DEa1BFf95D5B6D8b0a8cDBB";
 
 export enum Field {
   INPUT = "INPUT",

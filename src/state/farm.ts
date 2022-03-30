@@ -9,10 +9,10 @@ import { getSingleContractMultipleDataMultipleMethods } from "@/utils/muticall";
 import { BigNumber } from "@ethersproject/bignumber";
 import { Web3Provider } from "@ethersproject/providers";
 import { formatEther } from "@ethersproject/units";
-import { Token } from "@uniswap/sdk";
+import { Token, TokenAmount } from "@uniswap/sdk";
 
 export interface FarmPool {
-  lpToken: string;
+  lpToken: Token;
   tokens: {
     token0: Token;
     token1: Token;
@@ -29,7 +29,7 @@ export interface FarmPool {
         unlockTime: BigNumber;
       }
     | undefined;
-  lpBalance: BigNumber | undefined;
+  lpBalance: TokenAmount | undefined;
 }
 
 export const getFarmPoolLength = async (
@@ -102,9 +102,13 @@ export const getPool = async (
         callContract(pairContract, "balanceOf", [account]),
       ]);
     }
-    console.log(formatEther(lpBalance.toString()));
+    const _lpToken = new Token(
+      NETWORKS_SUPPORTED.chainId,
+      poolInfo.lpToken,
+      18
+    );
     return {
-      lpToken: poolInfo.lpToken,
+      lpToken: _lpToken,
       tokens: {
         token0: _token0,
         token1: _token1,
@@ -114,8 +118,46 @@ export const getPool = async (
       lastRewardTime: poolInfo.lastRewardTime,
       pendingReward,
       userInfo,
-      lpBalance,
+      lpBalance: new TokenAmount(_lpToken, lpBalance),
     };
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const startFarming = async (
+  library: Web3Provider,
+  account: string,
+  pid: number,
+  amount: TokenAmount | undefined,
+  lockTime: number
+) => {
+  try {
+    if (!amount) return;
+    const masterChiefContract = getMasterChiefContract(library, account);
+    return callContract(masterChiefContract, "deposit", [
+      pid,
+      amount.raw.toString(),
+      lockTime,
+    ]);
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const harvest = async (
+  library: Web3Provider,
+  account: string,
+  pid: number,
+  amount: BigNumber | undefined
+) => {
+  try {
+    if (!amount) return;
+    const masterChiefContract = getMasterChiefContract(library, account);
+    return callContract(masterChiefContract, "withdraw", [
+      pid,
+      amount.toString(),
+    ]);
   } catch (error) {
     throw error;
   }

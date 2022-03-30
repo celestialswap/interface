@@ -391,7 +391,7 @@ const Swap: NextPage = () => {
                 onClick={onSubmit}
               >
                 {loadedPool && !trade
-                  ? "no liquidity"
+                  ? "no route"
                   : poolInfo.noLiquidity && poolInfo.pair
                   ? "no liquidity"
                   : isNeedApproved
