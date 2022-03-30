@@ -21,7 +21,7 @@ interface PoolProps {
 }
 
 const Pool = ({ pool, setReload }: PoolProps) => {
-  const { chainId, account, library } = useActiveWeb3React();
+  const { account, library } = useActiveWeb3React();
 
   const [removePercent, setRemovePercent] = useState<number>(0);
   const [showTooltip, setShowTooltip] = useState<boolean>(false);
@@ -31,7 +31,6 @@ const Pool = ({ pool, setReload }: PoolProps) => {
     (async () => {
       try {
         if (
-          !chainId ||
           !account ||
           !library ||
           !pool.pair ||
@@ -44,7 +43,6 @@ const Pool = ({ pool, setReload }: PoolProps) => {
           .div(BigNumber.from("100"));
         setSubmitting(true);
         await removeLiquidityCallback(
-          chainId,
           account,
           library,
           pool.pair,
@@ -57,7 +55,7 @@ const Pool = ({ pool, setReload }: PoolProps) => {
         console.log(error);
       }
     })();
-  }, [chainId, account, library, pool, removePercent, setReload]);
+  }, [account, library, pool, removePercent, setReload]);
 
   return (
     <Box

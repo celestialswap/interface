@@ -32,7 +32,7 @@ import { parseUnits, formatUnits } from "@ethersproject/units";
 import { approves, getAllowances } from "@/state/erc20";
 
 const AddLiquidity: NextPage = () => {
-  const { chainId, account, library } = useActiveWeb3React();
+  const { account, library } = useActiveWeb3React();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const [tokens, setTokens] = useState<{ [key in Field]: Token | undefined }>({
@@ -66,14 +66,14 @@ const AddLiquidity: NextPage = () => {
 
   useEffect(() => {
     (async () => {
-      if (!account || !chainId) return;
+      if (!account || !library) return;
       try {
         const [balances, poolInfo] = await Promise.all([
-          getCurrencyBalances(chainId, account, library, [
+          getCurrencyBalances(account, library, [
             tokens[Field.INPUT],
             tokens[Field.OUTPUT],
           ]),
-          getPoolInfo(chainId, account, library, [
+          getPoolInfo(account, library, [
             tokens[Field.INPUT],
             tokens[Field.OUTPUT],
           ]),
@@ -84,10 +84,10 @@ const AddLiquidity: NextPage = () => {
         console.error(error);
       }
     })();
-  }, [account, library, chainId, tokens, reloadPool]);
+  }, [account, library, tokens, reloadPool]);
 
   useEffect(() => {
-    if (!account || !chainId) return;
+    if (!account || !library) return;
     getAllowances(
       library,
       account,
@@ -97,7 +97,7 @@ const AddLiquidity: NextPage = () => {
     )
       .then(setTokensNeedApproved)
       .catch(console.error);
-  }, [account, library, chainId, tokens, parsedTokenAmounts]);
+  }, [account, library, tokens, parsedTokenAmounts]);
 
   useEffect(() => {
     if (!poolInfo.noLiquidity) {

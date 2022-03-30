@@ -32,7 +32,6 @@ export function parseCallKey(callKey: string): Call {
 }
 
 export const getSingleContractMultipleData = async (
-  chainId: number,
   library: Web3Provider,
   contract: Contract | null | undefined,
   methodName: string,
@@ -129,7 +128,6 @@ export const getSingleContractMultipleDataMultipleMethods = async (
 };
 
 export const getMultipleContractMultipleDataMultipleMethods = async (
-  chainId: number,
   library: Web3Provider,
   contracts: (Contract | undefined)[],
   methodNames: string[],

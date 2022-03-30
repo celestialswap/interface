@@ -18,16 +18,16 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 const Liquidity: NextPage = () => {
-  const { chainId, account, library } = useActiveWeb3React();
+  const { account, library } = useActiveWeb3React();
 
   const [ownerPools, setOwnerPools] = useState<PoolState[]>([]);
   const [reload, setReload] = useState<boolean>(false);
 
   useEffect(() => {
-    getOwnerLiquidityPools(chainId, library, account).then((res) =>
+    getOwnerLiquidityPools(library, account).then((res) =>
       setOwnerPools(res as any)
     );
-  }, [chainId, account, library, reload]);
+  }, [account, library, reload]);
 
   return (
     <Box>

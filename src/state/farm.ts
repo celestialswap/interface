@@ -8,6 +8,7 @@ import {
 import { getSingleContractMultipleDataMultipleMethods } from "@/utils/muticall";
 import { BigNumber } from "@ethersproject/bignumber";
 import { Web3Provider } from "@ethersproject/providers";
+import { formatEther } from "@ethersproject/units";
 import { Token } from "@uniswap/sdk";
 
 export interface FarmPool {
@@ -19,6 +20,16 @@ export interface FarmPool {
   accStarPerShare: BigNumber;
   allocPoint: BigNumber;
   lastRewardTime: BigNumber;
+  pendingReward: BigNumber | undefined;
+  userInfo:
+    | {
+        amount: BigNumber;
+        userPoint: BigNumber;
+        rewardDebt: BigNumber;
+        unlockTime: BigNumber;
+      }
+    | undefined;
+  lpBalance: BigNumber | undefined;
 }
 
 export const getFarmPoolLength = async (
@@ -61,7 +72,7 @@ export const getPool = async (
           erc20Methods,
           erc20Methods.map((_) => [])
         );
-        if (!results?.length) return;
+        if (!results?.length) throw Error("invalid pair");
         const _token = results.reduce((memo, result, i) => {
           if (result?.[0]) memo[erc20Methods[i]] = result[0];
           return memo;
@@ -71,7 +82,7 @@ export const getPool = async (
             new Set([...Object.keys(_token), ...erc20Methods]).values()
           ).length !== erc20Methods.length
         )
-          return;
+          throw Error("invalid pair");
 
         return new Token(
           NETWORKS_SUPPORTED.chainId,
@@ -82,12 +93,28 @@ export const getPool = async (
         );
       })
     );
+
+    let pendingReward, userInfo, lpBalance;
+    if (account) {
+      [pendingReward, userInfo, lpBalance] = await Promise.all([
+        callContract(masterChiefContract, "pendingStar", [pid, account]),
+        callContract(masterChiefContract, "userInfo", [pid, account]),
+        callContract(pairContract, "balanceOf", [account]),
+      ]);
+    }
+    console.log(formatEther(lpBalance.toString()));
     return {
-      ...poolInfo,
+      lpToken: poolInfo.lpToken,
       tokens: {
         token0: _token0,
         token1: _token1,
       },
+      accStarPerShare: poolInfo.accStarPerShare,
+      allocPoint: poolInfo.allocPoint,
+      lastRewardTime: poolInfo.lastRewardTime,
+      pendingReward,
+      userInfo,
+      lpBalance,
     };
   } catch (error) {
     throw error;

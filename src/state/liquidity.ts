@@ -29,7 +29,6 @@ import { getBNBBalances, getPairInfo, getTokenBalances } from "state";
 import { computePairAddress } from "../utils";
 
 export const getCurrencyBalances = async (
-  chainId: number,
   account: string,
   library: Web3Provider,
   currencies: (Token | undefined)[]
@@ -41,23 +40,16 @@ export const getCurrencyBalances = async (
         (currency): currency is Token =>
           currency instanceof Token && !currency.equals(WETH)
       ) ?? [];
-    const containsBNB: boolean = !chainId
-      ? false
-      : currencies?.some((currency) => currency === WETH) ?? false;
+    const containsBNB: boolean =
+      currencies?.some((currency) => currency === WETH) ?? false;
     const ethBalance = await getBNBBalances(
-      chainId,
       library,
       containsBNB ? [account] : []
     );
-    const tokenBalances = await getTokenBalances(
-      chainId,
-      account,
-      library,
-      tokens
-    );
+    const tokenBalances = await getTokenBalances(account, library, tokens);
     return (
       currencies?.map((currency) => {
-        if (!account || !currency || !chainId) return undefined;
+        if (!account || !currency) return undefined;
         if (currency === WETH) return ethBalance[account];
         if (currency instanceof Token) return tokenBalances[currency.address];
         return undefined;
@@ -93,7 +85,6 @@ export const EmptyPool: PoolState = {
 };
 
 export const getPoolInfo = async (
-  chainId: number,
   account: string,
   library: Web3Provider,
   currencies: (Token | undefined)[]
@@ -113,7 +104,7 @@ export const getPoolInfo = async (
   } catch (error) {
     return EmptyPool;
   }
-  const pairInfo = await getPairInfo(chainId, library, account, pairContract);
+  const pairInfo = await getPairInfo(library, account, pairContract);
   if (!pairInfo) return EmptyPool;
   const { token0, reserve0, reserve1, balanceOf, totalSupply } = pairInfo;
   const isTokenA0 = tokenA.address === token0;
@@ -219,12 +210,11 @@ export const addLiquidityCallback = async (
 };
 
 export const getOwnerLiquidityPools = async (
-  chainId: number | undefined,
   library: Web3Provider | undefined,
   account: string | null | undefined
 ): Promise<(PoolState | undefined)[]> => {
   try {
-    if (!chainId || !library || !account) return [];
+    if (!library || !account) return [];
 
     const factoryContract = getFactoryContract(library);
     const allPairsLength = await callContract(
@@ -245,7 +235,6 @@ export const getOwnerLiquidityPools = async (
     // TODO call with multicall
     // const methodNames = ["token0", "token1"];
     // const results = await getMultipleContractMultipleDataMultipleMethods(
-    //   chainId,
     //   library,
     //   pairContracts,
     //   methodNames,
@@ -334,20 +323,13 @@ export const getOwnerLiquidityPools = async (
 };
 
 export const removeLiquidityCallback = async (
-  chainId: number | undefined,
   account: string | null | undefined,
   library: Web3Provider | null,
   pair: Pair,
   removeAmount: BigNumber
 ) => {
   try {
-    if (
-      !chainId ||
-      !account ||
-      !library ||
-      !WETH ||
-      removeAmount.lte(BigNumber.from("0"))
-    )
+    if (!account || !library || !WETH || removeAmount.lte(BigNumber.from("0")))
       return;
     let token0: Token, token1: Token;
     [token0, token1] = [pair.token0, pair.token1];

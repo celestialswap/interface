@@ -17,12 +17,12 @@ const Farm: NextPage = () => {
 
   return (
     <Stack spacing="4">
-      <Grid templateColumns="repeat(17  ,1fr)">
-        <GridItem colSpan={4}>Farm</GridItem>
-        <GridItem colSpan={4}>Pending Reward</GridItem>
-        <GridItem colSpan={4}>Total APR</GridItem>
-        <GridItem colSpan={4}>TVL</GridItem>
-        <GridItem></GridItem>
+      <Grid templateColumns="repeat(26  ,1fr)" gap="4">
+        <GridItem colSpan={6}>Farm</GridItem>
+        <GridItem colSpan={6}>Pending Reward</GridItem>
+        <GridItem colSpan={6}>Total APR</GridItem>
+        <GridItem colSpan={6}>TVL</GridItem>
+        <GridItem colSpan={2}></GridItem>
       </Grid>
       {new Array(poolLength).fill("").map((_, pid) => (
         <Pool key={pid} pid={pid} />

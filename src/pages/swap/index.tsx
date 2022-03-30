@@ -38,7 +38,7 @@ import { MdSwapVert } from "react-icons/md";
 import { getDerivedSwapInfo, swapCallback } from "@/state/swap";
 
 const Swap: NextPage = () => {
-  const { chainId, account, library } = useActiveWeb3React();
+  const { account, library } = useActiveWeb3React();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const [tokens, setTokens] = useState<{ [key in Field]: Token | undefined }>({
@@ -67,14 +67,14 @@ const Swap: NextPage = () => {
 
   useEffect(() => {
     (async () => {
-      if (!account || !chainId) return;
+      if (!account || !library) return;
       try {
         const [balances, poolInfo] = await Promise.all([
-          getCurrencyBalances(chainId, account, library, [
+          getCurrencyBalances(account, library, [
             tokens[Field.INPUT],
             tokens[Field.OUTPUT],
           ]),
-          getPoolInfo(chainId, account, library, [
+          getPoolInfo(account, library, [
             tokens[Field.INPUT],
             tokens[Field.OUTPUT],
           ]),
@@ -85,15 +85,14 @@ const Swap: NextPage = () => {
         console.error(error);
       }
     })();
-  }, [account, library, chainId, tokens, reloadPool]);
+  }, [account, library, tokens, reloadPool]);
 
   useEffect(() => {
     (async () => {
       try {
-        if (!account || !chainId) return;
+        if (!account) return;
         setLoadedPool(false);
         const trade = await getDerivedSwapInfo({
-          chainId,
           library,
           independentField,
           typedValue,
@@ -110,7 +109,6 @@ const Swap: NextPage = () => {
   }, [
     account,
     library,
-    chainId,
     tokens,
     typedValue,
     independentField,

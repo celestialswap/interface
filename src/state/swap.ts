@@ -47,14 +47,12 @@ export const tryParseAmount = (
 
 // from the current swap inputs, compute the best trade and return it.
 export const getDerivedSwapInfo = async ({
-  chainId,
   library,
   independentField = Field.INPUT,
   typedValue,
   currencies,
   singlehops,
 }: {
-  chainId: number | undefined;
   library: Web3Provider | undefined | null;
   independentField: Field;
   typedValue: string | BigNumber;
@@ -63,14 +61,13 @@ export const getDerivedSwapInfo = async ({
   };
   singlehops: boolean;
 }): Promise<Trade | null> => {
-  if (!chainId || !library) return null;
+  if (!library) return null;
   // console.log(independentField, typedValue, currencies);
   const { [Field.INPUT]: inputCurrency, [Field.OUTPUT]: outputCurrency } =
     currencies;
   if (!inputCurrency || !outputCurrency) return null;
 
   const allowedPairs = await getAllCommonPairs(
-    chainId,
     library,
     inputCurrency,
     outputCurrency
@@ -86,7 +83,6 @@ export const getDerivedSwapInfo = async ({
 
   const [bestTradeExactIn, bestTradeExactOut] = await Promise.all([
     getTradeExactIn(
-      chainId,
       library,
       inputCurrency,
       outputCurrency,
@@ -95,7 +91,6 @@ export const getDerivedSwapInfo = async ({
       singlehops
     ),
     getTradeExactOut(
-      chainId,
       library,
       inputCurrency,
       outputCurrency,

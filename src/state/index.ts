@@ -42,7 +42,6 @@ import flatMap from "lodash/flatMap";
  * Returns a map of the given addresses to their eventually consistent BNB balances.
  */
 export const getBNBBalances = async (
-  chainId: number,
   library: Web3Provider,
   uncheckedAddresses?: (string | undefined | null)[]
 ): Promise<{
@@ -56,7 +55,6 @@ export const getBNBBalances = async (
         .sort()
     : [];
   const results = await getSingleContractMultipleData(
-    chainId,
     library,
     multicallContract,
     "getEthBalance",
@@ -76,7 +74,6 @@ export const getBNBBalances = async (
  * Returns a map of the given addresses to their eventually consistent token balances.
  */
 export const getTokenBalances = async (
-  chainId: number,
   account: string,
   library: Web3Provider,
   tokens: Token[]
@@ -112,7 +109,6 @@ export const getTokenBalances = async (
  * Returns pair info
  */
 export const getPairInfo = async (
-  chainId: number,
   library: Web3Provider,
   account: string,
   pairContract: Contract
@@ -126,7 +122,6 @@ export const getPairInfo = async (
       "totalSupply",
     ];
     const results = await getSingleContractMultipleDataMultipleMethods(
-      chainId,
       library,
       pairContract,
       methodNames,
@@ -155,7 +150,6 @@ export enum PairState {
 }
 
 export const getPairs = async (
-  chainId: number,
   library: Web3Provider,
   currencies: Token[][]
 ) => {
@@ -165,7 +159,7 @@ export const getPairs = async (
   ]);
 
   const pairAddresses = tokens.map(([tokenA, tokenB]) => {
-    return chainId && tokenA && tokenB && !tokenA.equals(tokenB)
+    return tokenA && tokenB && !tokenA.equals(tokenB)
       ? computePairAddress({
           factoryAddress: FACTORY_ADDRESS,
           tokenA,
@@ -207,26 +201,22 @@ export const getPairs = async (
 };
 
 export const getAllCommonPairs = async (
-  chainId: number | undefined,
   library: Web3Provider | null | undefined,
   currencyA: Token | undefined,
   currencyB: Token | undefined
 ): Promise<Pair[]> => {
-  if (!chainId || !library) return [];
-  const [tokenA, tokenB] = chainId
-    ? [
-        // wrappedCurrency(currencyA, chainId),
-        // wrappedCurrency(currencyB, chainId),
-        currencyA,
-        currencyB,
-      ]
-    : [undefined, undefined];
+  if (!library) return [];
+  const [tokenA, tokenB] = [
+    // wrappedCurrency(currencyA),
+    // wrappedCurrency(currencyB),
+    currencyA,
+    currencyB,
+  ];
   if (!tokenA || !tokenB) return [];
 
-  const bases =
-    chainId && BASES_TO_CHECK_TRADES_AGAINST
-      ? BASES_TO_CHECK_TRADES_AGAINST
-      : [];
+  const bases = BASES_TO_CHECK_TRADES_AGAINST
+    ? BASES_TO_CHECK_TRADES_AGAINST
+    : [];
 
   const basePairs = flatMap(bases, (base) =>
     bases.map((otherBase) => [base, otherBase])
@@ -247,7 +237,6 @@ export const getAllCommonPairs = async (
           .filter((tokens) => Boolean(tokens[0] && tokens[1]))
           .filter(([t0, t1]) => t0.address !== t1.address)
           .filter(([tokenA, tokenB]) => {
-            if (!chainId) return true;
             const customBases = CUSTOM_BASES;
             if (!customBases) return true;
 
@@ -271,7 +260,7 @@ export const getAllCommonPairs = async (
           })
       : [];
 
-  const allPairs = await getPairs(chainId, library, allPairCombinations);
+  const allPairs = await getPairs(library, allPairCombinations);
 
   return Object.values(
     allPairs
@@ -315,7 +304,6 @@ export function isTradeBetter(
 }
 
 export const getTradeExactIn = async (
-  chainId: number,
   library: Web3Provider,
   currencyA: Token,
   currencyB: Token,
@@ -323,12 +311,7 @@ export const getTradeExactIn = async (
   currencyOut: Token,
   singleHopOnly: boolean = true
 ): Promise<Trade | null> => {
-  const allowedPairs = await getAllCommonPairs(
-    chainId,
-    library,
-    currencyA,
-    currencyB
-  );
+  const allowedPairs = await getAllCommonPairs(library, currencyA, currencyB);
   if (!allowedPairs.length) return null;
 
   if (currencyAmountIn && currencyOut && allowedPairs.length > 0) {
@@ -365,7 +348,6 @@ export const getTradeExactIn = async (
 };
 
 export const getTradeExactOut = async (
-  chainId: number,
   library: Web3Provider,
   currencyA: Token,
   currencyB: Token,
@@ -373,12 +355,7 @@ export const getTradeExactOut = async (
   currencyIn: Token,
   singleHopOnly: boolean
 ): Promise<Trade | null> => {
-  const allowedPairs = await getAllCommonPairs(
-    chainId,
-    library,
-    currencyA,
-    currencyB
-  );
+  const allowedPairs = await getAllCommonPairs(library, currencyA, currencyB);
   if (!allowedPairs.length) return null;
 
   if (currencyAmountOut && currencyIn && allowedPairs.length > 0) {
