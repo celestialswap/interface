@@ -17,11 +17,22 @@ import {
   ModalOverlay,
   useDisclosure,
   VStack,
+  Icon,
 } from "@chakra-ui/react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { formatAddress } from "../utils";
+import { CgFileDocument } from "react-icons/cg";
+import {
+  IoMdSettings,
+  IoIosArrowForward,
+  IoMdGitNetwork,
+} from "react-icons/io";
+import { RiFeedbackFill } from "react-icons/ri";
+import { AiOutlineSwap } from "react-icons/ai";
+import { GiFarmTractor } from "react-icons/gi";
+import { FiGrid, FiCommand } from "react-icons/fi";
 
 const connectors = [
   {
@@ -90,24 +101,156 @@ const Web3Layout = ({ children }: { children: any }) => {
       </Modal>
 
       <HStack
-        h={14}
-        px={4}
-        py={2}
+        h={20}
+        px={12}
         justify="space-between"
         borderBottom="1px solid"
-        borderColor="gray.200"
+        borderColor="gray.400"
       >
-        <HStack>
+        {/* <HStack>
           <Link href="/">home</Link>
           <Link href="/swap">swap</Link>
           <Link href="/liquidity">liquidity</Link>
           <Link href="/farm">farm</Link>
-        </HStack>
-        <Button colorScheme="teal" onClick={() => (account ? null : onOpen())}>
+        </HStack> */}
+        <Box>Logo</Box>
+        <Button
+          colorScheme="teal"
+          onClick={() => (account ? null : onOpen())}
+          borderRadius="xl"
+        >
           {account ? formatAddress(account) : "connect wallet"}
         </Button>
       </HStack>
-      <Box h="calc(100vh - 3.5em)" py="4" px="32">
+      <Box
+        w="56"
+        pos="fixed"
+        top="20"
+        left="0"
+        bottom="0"
+        py="2"
+        px="4"
+        borderRight="1px solid"
+        borderColor="gray.400"
+        zIndex="1"
+        fontWeight="bold"
+      >
+        <VStack h="100%" align="stretch" spacing="0">
+          <Box flex="1" pb="2" borderBottom="1px solid" borderColor="gray.400">
+            <Link href="/swap" passHref>
+              <Box
+                px="4"
+                py="3"
+                borderRadius="xl"
+                _hover={{
+                  cursor: "pointer",
+                  bg: "gray.200",
+                }}
+              >
+                <HStack>
+                  <Icon h="6" w="6" as={AiOutlineSwap} />
+                  <Box>Swap</Box>
+                </HStack>
+              </Box>
+            </Link>
+            <Link href="/liquidity/add" passHref>
+              <Box
+                px="4"
+                py="3"
+                borderRadius="xl"
+                _hover={{
+                  cursor: "pointer",
+                  bg: "gray.200",
+                }}
+              >
+                <HStack>
+                  <Icon h="6" w="6" as={IoMdGitNetwork} />
+                  <Box>Liquidity</Box>
+                </HStack>
+              </Box>
+            </Link>
+            <Link href="/liquidity" passHref>
+              <Box
+                px="4"
+                py="3"
+                borderRadius="xl"
+                _hover={{
+                  cursor: "pointer",
+                  bg: "gray.200",
+                }}
+              >
+                <HStack>
+                  <Icon h="6" w="6" as={FiGrid} />
+                  <Box>Pools</Box>
+                </HStack>
+              </Box>
+            </Link>
+            <Link href="/farm" passHref>
+              <Box
+                px="4"
+                py="3"
+                borderRadius="xl"
+                _hover={{
+                  cursor: "pointer",
+                  bg: "gray.200",
+                }}
+              >
+                <HStack>
+                  <Icon h="6" w="6" as={GiFarmTractor} />
+                  <Box>Farm</Box>
+                </HStack>
+              </Box>
+            </Link>
+          </Box>
+          <Box h="40" pt="2">
+            <HStack
+              justify="space-between"
+              px="4"
+              py="3"
+              borderRadius="xl"
+              _hover={{
+                cursor: "pointer",
+                bg: "gray.200",
+              }}
+            >
+              <HStack>
+                <Icon h="5" w="5" as={IoMdSettings} />
+                <Box>Settings</Box>
+              </HStack>
+              <Icon h="5" w="5" as={IoIosArrowForward} />
+            </HStack>
+            <Box
+              px="4"
+              py="3"
+              borderRadius="xl"
+              _hover={{
+                cursor: "pointer",
+                bg: "gray.200",
+              }}
+            >
+              <HStack>
+                <Icon h="5" w="5" as={CgFileDocument} />
+                <Box>Docs</Box>
+              </HStack>
+            </Box>
+            <Box
+              px="4"
+              py="3"
+              borderRadius="xl"
+              _hover={{
+                cursor: "pointer",
+                bg: "gray.200",
+              }}
+            >
+              <HStack>
+                <Icon h="5" w="5" as={RiFeedbackFill} />
+                <Box>Feedback</Box>
+              </HStack>
+            </Box>
+          </Box>
+        </VStack>
+      </Box>
+      <Box h="calc(100vh - 5em)" ml="56" p="14">
         {children}
       </Box>
     </Box>
