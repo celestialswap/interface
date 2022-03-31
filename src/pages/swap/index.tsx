@@ -1,25 +1,23 @@
 import ListTokensModal from "@/components/ListTokensModal";
+import { BIPS_BASE, Field, ROUTER_ADDRESS } from "@/configs/networks";
 import { useActiveWeb3React } from "@/hooks/useActiveWeb3React";
+import { approves, getAllowances } from "@/state/erc20";
 import {
-  addLiquidityCallback,
   EmptyPool,
   getCurrencyBalances,
   getPoolInfo,
   PoolState,
 } from "@/state/liquidity";
+import { getDerivedSwapInfo, swapCallback } from "@/state/swap";
 import {
   Box,
   Button,
-  Grid,
   HStack,
   Icon,
   Input,
-  InputGroup,
-  InputRightAddon,
-  Switch,
   useDisclosure,
-  VStack,
 } from "@chakra-ui/react";
+import { parseUnits } from "@ethersproject/units";
 import {
   CurrencyAmount,
   Fraction,
@@ -31,11 +29,8 @@ import {
 } from "@uniswap/sdk";
 import type { NextPage } from "next";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { BIPS_BASE, Field, ROUTER_ADDRESS } from "@/configs/networks";
-import { parseUnits, formatUnits } from "@ethersproject/units";
-import { approves, getAllowances } from "@/state/erc20";
+import { IoIosArrowDown } from "react-icons/io";
 import { MdSwapVert } from "react-icons/md";
-import { getDerivedSwapInfo, swapCallback } from "@/state/swap";
 
 const Swap: NextPage = () => {
   const { account, library } = useActiveWeb3React();
@@ -226,9 +221,14 @@ const Swap: NextPage = () => {
       />
 
       <HStack justify="center">
-        <Box w="24em">
-          <VStack align="stretch">
-            <HStack align="flex-end" justify="flex-end">
+        <Box
+          w="24em"
+          border="1px solid"
+          borderColor="gray.200"
+          p="6"
+          borderRadius="xl"
+        >
+          {/* <HStack align="flex-end" justify="flex-end">
               <Box> slippage</Box>
               <InputGroup size="sm" w="32">
                 <Input
@@ -253,153 +253,152 @@ const Swap: NextPage = () => {
                 isChecked={disabledMultihops}
                 onChange={(_) => setDisabledMultihops((pre) => !pre)}
               />
+            </HStack> */}
+
+          <Box p="4" bg="gray.100" borderRadius="xl">
+            <HStack justify="space-between">
+              <Box>from</Box>
+              <Box>balance: {balances?.[0]?.toSignificant(6) ?? "--"}</Box>
             </HStack>
-
-            <Box>
-              <HStack justify="flex-end">
-                <Box>balance: {balances?.[0]?.toSignificant(6)}</Box>
-              </HStack>
-              <InputGroup size="sm">
-                <Input
-                  type="number"
-                  value={
-                    independentField === Field.INPUT
-                      ? typedValue
-                      : trade?.outputAmount.toSignificant(6) ?? ""
-                  }
-                  onChange={(e) =>
-                    handleChangeAmounts(e.target.value, Field.INPUT)
-                  }
-                />
-                {tokens[Field.INPUT] && (
-                  <InputRightAddon
-                    // eslint-disable-next-line react/no-children-prop
-                    children={
-                      <Box _hover={{ color: "gray.500", cursor: "pointer" }}>
-                        max
-                      </Box>
-                    }
-                  />
-                )}
-                <InputRightAddon
-                  // eslint-disable-next-line react/no-children-prop
-                  children={
-                    <Box
-                      _hover={{ color: "gray.500", cursor: "pointer" }}
-                      onClick={() => handleOpenModal(Field.INPUT)}
-                    >
-                      {tokens[Field.INPUT]?.symbol ?? "select a token"}
-                    </Box>
-                  }
-                />
-              </InputGroup>
-            </Box>
-            <Box textAlign="center">
-              <Icon
-                h="6"
-                w="6"
-                as={MdSwapVert}
-                cursor="pointer"
-                onClick={() => {
-                  const [_input, _output] = [
-                    tokens[Field.INPUT],
-                    tokens[Field.OUTPUT],
-                  ];
-                  console.log(_output, _input);
-                  setTokens({
-                    [Field.INPUT]: _output,
-                    [Field.OUTPUT]: _input,
-                  });
-                }}
-              />
-            </Box>
-            <Box>
-              <HStack justify="flex-end">
-                <Box>balance: {balances?.[1]?.toSignificant(6)}</Box>
-              </HStack>
-              <InputGroup size="sm">
-                <Input
-                  type="number"
-                  value={
-                    independentField === Field.OUTPUT
-                      ? typedValue
-                      : trade?.outputAmount.toSignificant(6) ?? ""
-                  }
-                  onChange={(e) =>
-                    handleChangeAmounts(e.target.value, Field.OUTPUT)
-                  }
-                />
-                {tokens[Field.OUTPUT] && (
-                  <InputRightAddon
-                    // eslint-disable-next-line react/no-children-prop
-                    children={
-                      <Box _hover={{ color: "gray.500", cursor: "pointer" }}>
-                        max
-                      </Box>
-                    }
-                  />
-                )}
-                <InputRightAddon
-                  // eslint-disable-next-line react/no-children-prop
-                  children={
-                    <Box
-                      _hover={{ color: "gray.500", cursor: "pointer" }}
-                      onClick={() => handleOpenModal(Field.OUTPUT)}
-                    >
-                      {tokens[Field.OUTPUT]?.symbol ?? "select a token"}
-                    </Box>
-                  }
-                />
-              </InputGroup>
-            </Box>
-
-            {trade && (
-              <>
-                <Box>price: {trade?.executionPrice.toSignificant(6)}</Box>
-                <Box>
-                  price impact: -
-                  {parseFloat(trade?.priceImpact.toSignificant(6)).toFixed(2)}%
-                </Box>
-                <Box>
-                  {slippage
-                    ? independentField === Field.INPUT
-                      ? `minimum received: ${trade
-                          ?.minimumAmountOut(
-                            new Percent(JSBI.BigInt(slippage * 100), BIPS_BASE)
-                          )
-                          .toSignificant(6)}`
-                      : `maximum sent: ${trade
-                          ?.maximumAmountIn(
-                            new Percent(JSBI.BigInt(slippage * 100), BIPS_BASE)
-                          )
-                          .toSignificant(6)}`
-                    : ""}
-                </Box>
-                <Box>
-                  route path:{" "}
-                  {trade?.route.path.map((t) => t.symbol).join(" - ")}
-                </Box>
-              </>
-            )}
-
-            <Box pt="4">
-              <Button
-                colorScheme="teal"
-                w="100%"
-                isDisabled={isDisableBtn}
-                isLoading={submitting}
-                onClick={onSubmit}
+            <HStack>
+              <HStack
+                _hover={{ color: "gray.500", cursor: "pointer" }}
+                onClick={() => handleOpenModal(Field.INPUT)}
               >
-                {loadedPool && !trade
-                  ? "no route"
-                  : poolInfo.noLiquidity && poolInfo.pair
-                  ? "no liquidity"
-                  : isNeedApproved
-                  ? "approve token"
-                  : "swap"}
-              </Button>
-            </Box>
-          </VStack>
+                <Box whiteSpace="nowrap">
+                  {tokens[Field.INPUT]?.symbol ?? "--"}
+                </Box>
+                <Box borderRight="1px solid" pr="4">
+                  <Icon w="3" h="3" as={IoIosArrowDown} />
+                </Box>
+              </HStack>
+              <Input
+                type="number"
+                border="none"
+                _hover={{
+                  border: "none",
+                }}
+                _focus={{
+                  border: "none",
+                }}
+                textAlign="right"
+                value={
+                  independentField === Field.INPUT
+                    ? typedValue
+                    : trade?.inputAmount.toSignificant(6) ?? ""
+                }
+                onChange={(e) =>
+                  handleChangeAmounts(e.target.value, Field.INPUT)
+                }
+              />
+            </HStack>
+          </Box>
+          <HStack justify="center" p="4">
+            <Icon
+              h="8"
+              w="8"
+              as={MdSwapVert}
+              cursor="pointer"
+              bg="gray.100"
+              p="1"
+              borderRadius="3em"
+              onClick={() => {
+                const [_input, _output] = [
+                  tokens[Field.INPUT],
+                  tokens[Field.OUTPUT],
+                ];
+                // console.log(_output, _input);
+                setTokens({
+                  [Field.INPUT]: _output,
+                  [Field.OUTPUT]: _input,
+                });
+              }}
+            />
+          </HStack>
+          <Box p="4" bg="gray.100" borderRadius="xl">
+            <HStack justify="space-between">
+              <Box>to</Box>
+              <Box>balance: {balances?.[1]?.toSignificant(6)}</Box>
+            </HStack>
+            <HStack>
+              <HStack
+                _hover={{ color: "gray.500", cursor: "pointer" }}
+                onClick={() => handleOpenModal(Field.OUTPUT)}
+              >
+                <Box whiteSpace="nowrap">
+                  {tokens[Field.OUTPUT]?.symbol ?? "--"}
+                </Box>
+
+                <Box borderRight="1px solid" pr="4">
+                  <Icon w="3" h="3" as={IoIosArrowDown} />
+                </Box>
+              </HStack>
+              <Input
+                type="number"
+                border="none"
+                _hover={{
+                  border: "none",
+                }}
+                _focus={{
+                  border: "none",
+                }}
+                textAlign="right"
+                value={
+                  independentField === Field.OUTPUT
+                    ? typedValue
+                    : trade?.outputAmount.toSignificant(6) ?? ""
+                }
+                onChange={(e) =>
+                  handleChangeAmounts(e.target.value, Field.OUTPUT)
+                }
+              />
+            </HStack>
+          </Box>
+          {trade && (
+            <>
+              <Box>price: {trade?.executionPrice.toSignificant(6)}</Box>
+              <Box>
+                price impact: -
+                {parseFloat(trade?.priceImpact.toSignificant(6)).toFixed(2)}%
+              </Box>
+              <Box>
+                {slippage
+                  ? independentField === Field.INPUT
+                    ? `minimum received: ${trade
+                        ?.minimumAmountOut(
+                          new Percent(JSBI.BigInt(slippage * 100), BIPS_BASE)
+                        )
+                        .toSignificant(6)}`
+                    : `maximum sent: ${trade
+                        ?.maximumAmountIn(
+                          new Percent(JSBI.BigInt(slippage * 100), BIPS_BASE)
+                        )
+                        .toSignificant(6)}`
+                  : ""}
+              </Box>
+              <Box>
+                route path: {trade?.route.path.map((t) => t.symbol).join(" - ")}
+              </Box>
+            </>
+          )}
+
+          <Box pt="4">
+            <Button
+              colorScheme="teal"
+              w="100%"
+              isDisabled={isDisableBtn}
+              isLoading={submitting}
+              onClick={onSubmit}
+            >
+              {loadedPool && !trade
+                ? "no route"
+                : poolInfo.noLiquidity && poolInfo.pair
+                ? "no liquidity"
+                : isNeedApproved
+                ? "approve token"
+                : "swap"}
+            </Button>
+          </Box>
         </Box>
       </HStack>
     </Box>

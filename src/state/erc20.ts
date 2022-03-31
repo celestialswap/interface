@@ -1,11 +1,47 @@
-import { WETH } from "@/configs/networks";
+import { NETWORKS_SUPPORTED, WETH } from "@/configs/networks";
 import { callContract, getERC20Contract } from "@/hooks/useContract";
-import { getMultipleContractMultipleData } from "@/utils/muticall";
+import {
+  getMultipleContractMultipleData,
+  getSingleContractMultipleDataMultipleMethods,
+} from "@/utils/muticall";
 import { BigNumber } from "@ethersproject/bignumber";
 import { MaxUint256 } from "@ethersproject/constants";
 import { Web3Provider } from "@ethersproject/providers";
 import { Token, TokenAmount } from "@uniswap/sdk";
 import { CurrencyAmount } from "@uniswap/sdk-core";
+
+export const getToken = async (
+  token: string,
+  library: Web3Provider | undefined
+): Promise<Token | undefined> => {
+  if (!library) return;
+  const erc20Contract = getERC20Contract(token, library);
+  const erc20Methods = ["name", "symbol", "decimals"];
+  const results = await getSingleContractMultipleDataMultipleMethods(
+    library,
+    erc20Contract,
+    erc20Methods,
+    erc20Methods.map((_) => [])
+  );
+  if (!results?.length) return;
+  const _token = results.reduce((memo, result, i) => {
+    if (result?.[0]) memo[erc20Methods[i]] = result[0];
+    return memo;
+  }, {});
+  if (
+    Array.from(new Set([...Object.keys(_token), ...erc20Methods]).values())
+      .length !== erc20Methods.length
+  )
+    return;
+
+  return new Token(
+    NETWORKS_SUPPORTED.chainId,
+    token,
+    _token["decimals"],
+    _token["symbol"],
+    _token["name"]
+  );
+};
 
 export const getAllowances = async (
   library: Web3Provider,

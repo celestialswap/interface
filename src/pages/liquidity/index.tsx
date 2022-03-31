@@ -1,18 +1,7 @@
 import Pool from "@/components/liquidity/Pool";
-import { Field } from "@/configs/networks";
 import { useActiveWeb3React } from "@/hooks/useActiveWeb3React";
 import { getOwnerLiquidityPools, PoolState } from "@/state/liquidity";
-import {
-  Box,
-  Button,
-  Grid,
-  HStack,
-  Slider,
-  SliderFilledTrack,
-  SliderMark,
-  SliderThumb,
-  SliderTrack,
-} from "@chakra-ui/react";
+import { Box, Button, Grid } from "@chakra-ui/react";
 import type { NextPage } from "next";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -24,9 +13,13 @@ const Liquidity: NextPage = () => {
   const [reload, setReload] = useState<boolean>(false);
 
   useEffect(() => {
-    getOwnerLiquidityPools(library, account).then((res) =>
-      setOwnerPools(res as any)
-    );
+    let isMounted = true;
+    getOwnerLiquidityPools(library, account)
+      .then((res) => isMounted && setOwnerPools(res as any))
+      .catch(console.error);
+    return () => {
+      isMounted = false;
+    };
   }, [account, library, reload]);
 
   return (

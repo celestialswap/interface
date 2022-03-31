@@ -191,7 +191,7 @@ const Pool = ({ pid }: { pid: number }) => {
       {loading ? (
         <Skeleton h="16" />
       ) : pool ? (
-        <Grid templateColumns="repeat(26  ,1fr)" gap="4">
+        <Grid templateColumns="repeat(24  ,1fr)" gap="4">
           <GridItem colSpan={6}>
             {pool.tokens.token0.symbol} - {pool.tokens.token1.symbol}
           </GridItem>
@@ -205,7 +205,6 @@ const Pool = ({ pid }: { pid: number }) => {
           </GridItem>
           <GridItem colSpan={6}>--</GridItem>
           <GridItem colSpan={6}>--</GridItem>
-          <GridItem colSpan={2}></GridItem>
           <GridItem colSpan={12}>
             <HStack justify="space-between">
               <Box>
@@ -223,7 +222,7 @@ const Pool = ({ pid }: { pid: number }) => {
               </Button>
             </HStack>
           </GridItem>
-          <GridItem colStart={16} colSpan={12}>
+          <GridItem colSpan={12}>
             <HStack justify="space-between">
               <Box>
                 pending reward:

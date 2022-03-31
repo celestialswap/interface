@@ -12,6 +12,7 @@ import {
   Button,
   Grid,
   HStack,
+  Icon,
   Input,
   InputGroup,
   InputRightAddon,
@@ -30,6 +31,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Field, ROUTER_ADDRESS } from "@/configs/networks";
 import { parseUnits, formatUnits } from "@ethersproject/units";
 import { approves, getAllowances } from "@/state/erc20";
+import { IoIosArrowDown, IoIosAdd } from "react-icons/io";
+import { AiOutlineSwap } from "react-icons/ai";
 
 const AddLiquidity: NextPage = () => {
   const { account, library } = useActiveWeb3React();
@@ -56,6 +59,7 @@ const AddLiquidity: NextPage = () => {
   const [reloadPool, setReloadPool] = useState<boolean>(false);
   const [poolInfo, setPoolInfo] = useState<PoolState>(EmptyPool);
   const [submitting, setSubmitting] = useState<boolean>(false);
+  const [typePrice, setTypePrice] = useState<Field>(Field.INPUT);
 
   // console.count("render");
   // useEffect(() => {
@@ -258,144 +262,190 @@ const AddLiquidity: NextPage = () => {
       />
 
       <HStack justify="center">
-        <Box w="24em">
-          <VStack align="stretch">
-            <Box>
-              <HStack justify="flex-end">
-                <Box>balance: {balances?.[0]?.toSignificant(6)}</Box>
-              </HStack>
-              <InputGroup size="sm">
-                <Input
-                  type="number"
-                  value={tokenAmounts[Field.INPUT]}
-                  onChange={(e) =>
-                    handleChangeAmounts(e.target.value, Field.INPUT)
-                  }
-                />
-                {tokens[Field.INPUT] && (
-                  <InputRightAddon
-                    // eslint-disable-next-line react/no-children-prop
-                    children={
-                      <Box _hover={{ color: "gray.500", cursor: "pointer" }}>
-                        max
-                      </Box>
-                    }
-                  />
-                )}
-                <InputRightAddon
-                  // eslint-disable-next-line react/no-children-prop
-                  children={
-                    <Box
-                      _hover={{ color: "gray.500", cursor: "pointer" }}
-                      onClick={() => handleOpenModal(Field.INPUT)}
-                    >
-                      {tokens[Field.INPUT]?.symbol ?? "select a token"}
-                    </Box>
-                  }
-                />
-              </InputGroup>
-            </Box>
-            <Box textAlign="center">+</Box>
-            <Box>
-              <HStack justify="flex-end">
-                <Box>balance: {balances?.[1]?.toSignificant(6)}</Box>
-              </HStack>
-              <InputGroup size="sm">
-                <Input
-                  type="number"
-                  value={tokenAmounts[Field.OUTPUT]}
-                  onChange={(e) =>
-                    handleChangeAmounts(e.target.value, Field.OUTPUT)
-                  }
-                />
-                {tokens[Field.OUTPUT] && (
-                  <InputRightAddon
-                    // eslint-disable-next-line react/no-children-prop
-                    children={
-                      <Box _hover={{ color: "gray.500", cursor: "pointer" }}>
-                        max
-                      </Box>
-                    }
-                  />
-                )}
-                <InputRightAddon
-                  // eslint-disable-next-line react/no-children-prop
-                  children={
-                    <Box
-                      _hover={{ color: "gray.500", cursor: "pointer" }}
-                      onClick={() => handleOpenModal(Field.OUTPUT)}
-                    >
-                      {tokens[Field.OUTPUT]?.symbol ?? "select a token"}
-                    </Box>
-                  }
-                />
-              </InputGroup>
-            </Box>
-
-            {tokens[Field.INPUT] && tokens[Field.OUTPUT] && (
-              <Box>
-                <Box>
-                  {poolInfo.noLiquidity
-                    ? "create pool"
-                    : "prices and pool share"}
-                </Box>
-                <Grid templateColumns="repeat(3,1fr)" placeItems="center">
-                  <Box textAlign="center">
-                    <Box>
-                      {poolInfo.prices[Field.INPUT]?.toSignificant(6) ?? "0"}
-                    </Box>
-                    <Box>
-                      {tokens[Field.INPUT]?.symbol}/
-                      {tokens[Field.OUTPUT]?.symbol}
-                    </Box>
-                  </Box>
-                  <Box textAlign="center">
-                    <Box>
-                      {poolInfo.prices[Field.OUTPUT]?.toSignificant(6) ?? "0"}
-                    </Box>
-                    <Box>
-                      {tokens[Field.OUTPUT]?.symbol}/
-                      {tokens[Field.INPUT]?.symbol}
-                    </Box>
-                  </Box>
-
-                  <Box textAlign="center">
-                    <Box>{poolInfo.shareOfPool?.toSignificant(2) ?? "0"}%</Box>
-                    <Box>Share of Pool</Box>
-                  </Box>
-                </Grid>
-              </Box>
-            )}
-            {poolInfo.totalSupply &&
-              parsedTokenAmounts[Field.INPUT]?.raw.toString() !== "0" &&
-              parsedTokenAmounts[Field.OUTPUT]?.raw.toString() !== "0" && (
-                <Box>
-                  LP tokens minted:{" "}
-                  {poolInfo.totalSupply &&
-                    parsedTokenAmounts[Field.INPUT] &&
-                    parsedTokenAmounts[Field.OUTPUT] &&
-                    poolInfo?.pair
-                      ?.getLiquidityMinted(
-                        poolInfo.totalSupply as TokenAmount,
-                        parsedTokenAmounts[Field.INPUT] as TokenAmount,
-                        parsedTokenAmounts[Field.OUTPUT] as TokenAmount
-                      )
-                      .toSignificant(6)}
-                </Box>
-              )}
-
-            <Box pt="4">
-              <Button
-                colorScheme="teal"
-                w="100%"
-                isDisabled={isDisableBtn}
-                isLoading={submitting}
-                onClick={onSubmit}
+        <Box
+          w="24em"
+          border="1px solid"
+          borderColor="gray.200"
+          p="6"
+          borderRadius="xl"
+        >
+          <Box p="4" bg="gray.100" borderRadius="xl">
+            <HStack justify="flex-end">
+              <Box>balance: {balances?.[0]?.toSignificant(6)}</Box>
+            </HStack>
+            <HStack>
+              <HStack
+                _hover={{ color: "gray.500", cursor: "pointer" }}
+                onClick={() => handleOpenModal(Field.INPUT)}
               >
-                {isNeedApproved ? "approve tokens" : "add liquidity"}
-              </Button>
+                <Box whiteSpace="nowrap">
+                  {tokens[Field.INPUT]?.symbol ?? "--"}
+                </Box>
+                <Box borderRight="1px solid" pr="4">
+                  <Icon w="3" h="3" as={IoIosArrowDown} />
+                </Box>
+              </HStack>
+              <Input
+                type="number"
+                border="none"
+                _hover={{
+                  border: "none",
+                }}
+                _focus={{
+                  border: "none",
+                }}
+                textAlign="right"
+                value={tokenAmounts[Field.INPUT]}
+                onChange={(e) =>
+                  handleChangeAmounts(e.target.value, Field.INPUT)
+                }
+              />
+            </HStack>
+          </Box>
+          <HStack justify="space-between" p="4">
+            <Icon
+              h="8"
+              w="8"
+              as={IoIosAdd}
+              cursor="pointer"
+              bg="gray.100"
+              p="1"
+              borderRadius="3em"
+            />
+            {tokens[Field.INPUT] && tokens[Field.OUTPUT] && (
+              <HStack>
+                <Icon
+                  h="8"
+                  w="8"
+                  as={AiOutlineSwap}
+                  cursor="pointer"
+                  bg="gray.100"
+                  p="1"
+                  borderRadius="3em"
+                  onClick={() => {
+                    if (typePrice === Field.INPUT)
+                      return setTypePrice(Field.OUTPUT);
+                    return setTypePrice(Field.INPUT);
+                  }}
+                />
+                <Box>
+                  {typePrice === Field.INPUT
+                    ? `1 ${tokens[Field.INPUT]?.symbol} ~ ${
+                        poolInfo.prices[Field.INPUT]?.toSignificant(6) ?? "0"
+                      }`
+                    : `1 ${tokens[Field.OUTPUT]?.symbol} ~ ${
+                        poolInfo.prices[Field.OUTPUT]?.toSignificant(6) ?? "0"
+                      }`}
+                </Box>
+              </HStack>
+            )}
+          </HStack>
+          <Box p="4" bg="gray.100" borderRadius="xl">
+            <HStack justify="flex-end">
+              <Box>balance: {balances?.[1]?.toSignificant(6)}</Box>
+            </HStack>
+            <HStack>
+              <HStack
+                _hover={{ color: "gray.500", cursor: "pointer" }}
+                onClick={() => handleOpenModal(Field.OUTPUT)}
+              >
+                <Box whiteSpace="nowrap">
+                  {tokens[Field.OUTPUT]?.symbol ?? "--"}
+                </Box>
+                <Box borderRight="1px solid" pr="4">
+                  <Icon w="3" h="3" as={IoIosArrowDown} />
+                </Box>
+              </HStack>
+              <Input
+                type="number"
+                border="none"
+                _hover={{
+                  border: "none",
+                }}
+                _focus={{
+                  border: "none",
+                }}
+                textAlign="right"
+                value={tokenAmounts[Field.OUTPUT]}
+                onChange={(e) =>
+                  handleChangeAmounts(e.target.value, Field.OUTPUT)
+                }
+              />
+            </HStack>
+          </Box>
+
+          {/* {tokens[Field.INPUT] && tokens[Field.OUTPUT] && (
+            <Box>
+              <Box>
+                {poolInfo.noLiquidity ? "create pool" : "prices and pool share"}
+              </Box>
+              <Grid templateColumns="repeat(3,1fr)" placeItems="center">
+                <Box textAlign="center">
+                  <Box>
+                    {poolInfo.prices[Field.INPUT]?.toSignificant(6) ?? "0"}
+                  </Box>
+                  <Box>
+                    {tokens[Field.INPUT]?.symbol}/{tokens[Field.OUTPUT]?.symbol}
+                  </Box>
+                </Box>
+                <Box textAlign="center">
+                  <Box>
+                    {poolInfo.prices[Field.OUTPUT]?.toSignificant(6) ?? "0"}
+                  </Box>
+                  <Box>
+                    {tokens[Field.OUTPUT]?.symbol}/{tokens[Field.INPUT]?.symbol}
+                  </Box>
+                </Box>
+              </Grid>
             </Box>
-          </VStack>
+          )} */}
+          {tokens[Field.INPUT] && tokens[Field.OUTPUT] && (
+            <VStack
+              align="stretch"
+              p="4"
+              bg="gray.100"
+              borderRadius="xl"
+              mt="4"
+              fontSize="xs"
+            >
+              <HStack justify="space-between">
+                <Box>Share of Pool</Box>
+                <Box>{poolInfo.shareOfPool?.toSignificant(2) ?? "0"}%</Box>
+              </HStack>
+
+              {poolInfo.totalSupply &&
+                parsedTokenAmounts[Field.INPUT]?.raw.toString() !== "0" &&
+                parsedTokenAmounts[Field.OUTPUT]?.raw.toString() !== "0" && (
+                  <HStack>
+                    <Box>LP tokens minted</Box>
+                    <Box>
+                      {poolInfo.totalSupply &&
+                        parsedTokenAmounts[Field.INPUT] &&
+                        parsedTokenAmounts[Field.OUTPUT] &&
+                        poolInfo?.pair
+                          ?.getLiquidityMinted(
+                            poolInfo.totalSupply as TokenAmount,
+                            parsedTokenAmounts[Field.INPUT] as TokenAmount,
+                            parsedTokenAmounts[Field.OUTPUT] as TokenAmount
+                          )
+                          .toSignificant(6)}
+                    </Box>
+                  </HStack>
+                )}
+            </VStack>
+          )}
+
+          <Box pt="4">
+            <Button
+              colorScheme="teal"
+              w="100%"
+              isDisabled={isDisableBtn}
+              isLoading={submitting}
+              onClick={onSubmit}
+            >
+              {isNeedApproved ? "approve tokens" : "add liquidity"}
+            </Button>
+          </Box>
         </Box>
       </HStack>
     </Box>
