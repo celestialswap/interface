@@ -13,6 +13,7 @@ import {
   Grid,
   HStack,
   Icon,
+  Image,
   Input,
   InputGroup,
   InputRightAddon,
@@ -28,18 +29,22 @@ import {
 } from "@uniswap/sdk";
 import type { NextPage } from "next";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Field, ROUTER_ADDRESS } from "@/configs/networks";
+import { Field, ROUTER_ADDRESS, WETH } from "@/configs/networks";
 import { parseUnits, formatUnits } from "@ethersproject/units";
 import { approves, getAllowances } from "@/state/erc20";
 import { IoIosArrowDown, IoIosAdd } from "react-icons/io";
 import { AiOutlineSwap } from "react-icons/ai";
+import Link from "next/link";
+import { IoArrowBack } from "react-icons/io5";
+import { useRouter } from "next/router";
 
 const AddLiquidity: NextPage = () => {
   const { account, library } = useActiveWeb3React();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const router = useRouter();
 
   const [tokens, setTokens] = useState<{ [key in Field]: Token | undefined }>({
-    [Field.INPUT]: undefined,
+    [Field.INPUT]: WETH,
     [Field.OUTPUT]: undefined,
   });
   const [balances, setBalances] = useState<
@@ -261,14 +266,39 @@ const AddLiquidity: NextPage = () => {
         callback={handleSelectToken}
       />
 
-      <HStack justify="center">
-        <Box
+      <VStack justify="center">
+        <VStack
+          align="stretch"
+          spacing="4"
           w="24em"
           border="1px solid"
           borderColor="gray.200"
           p="6"
           borderRadius="xl"
         >
+          <Box>
+            <Box
+              bg="gray.200"
+              p="3"
+              borderRadius="3xl"
+              fontWeight="bold"
+              fontSize="lg"
+              // color="white"
+              textAlign="center"
+              pos="relative"
+            >
+              <Icon
+                as={IoArrowBack}
+                w="6"
+                h="6"
+                pos="absolute"
+                left="4"
+                cursor="pointer"
+                onClick={() => router.push("/liquidity")}
+              />
+              Add Liquidity
+            </Box>
+          </Box>
           <Box p="4" bg="gray.100" borderRadius="xl">
             <HStack justify="flex-end">
               <Box>balance: {balances?.[0]?.toSignificant(6)}</Box>
@@ -278,12 +308,19 @@ const AddLiquidity: NextPage = () => {
                 _hover={{ color: "gray.500", cursor: "pointer" }}
                 onClick={() => handleOpenModal(Field.INPUT)}
               >
+                {tokens[Field.INPUT] && (
+                  <Image
+                    src="/images/anonymous-token.svg"
+                    fallbackSrc="/images/anonymous-token.svg"
+                    alt="icon"
+                  />
+                )}
                 <Box whiteSpace="nowrap">
                   {tokens[Field.INPUT]?.symbol ?? "--"}
                 </Box>
-                <Box borderRight="1px solid" pr="4">
-                  <Icon w="3" h="3" as={IoIosArrowDown} />
-                </Box>
+                <VStack borderRight="1px solid" pr="4">
+                  <Icon w="4" h="4" as={IoIosArrowDown} />
+                </VStack>
               </HStack>
               <Input
                 type="number"
@@ -302,7 +339,7 @@ const AddLiquidity: NextPage = () => {
               />
             </HStack>
           </Box>
-          <HStack justify="space-between" p="4">
+          <HStack justify="space-between">
             <Icon
               h="8"
               w="8"
@@ -349,12 +386,19 @@ const AddLiquidity: NextPage = () => {
                 _hover={{ color: "gray.500", cursor: "pointer" }}
                 onClick={() => handleOpenModal(Field.OUTPUT)}
               >
+                {tokens[Field.OUTPUT] && (
+                  <Image
+                    src="/images/anonymous-token.svg"
+                    fallbackSrc="/images/anonymous-token.svg"
+                    alt="icon"
+                  />
+                )}
                 <Box whiteSpace="nowrap">
                   {tokens[Field.OUTPUT]?.symbol ?? "--"}
                 </Box>
-                <Box borderRight="1px solid" pr="4">
-                  <Icon w="3" h="3" as={IoIosArrowDown} />
-                </Box>
+                <VStack borderRight="1px solid" pr="4">
+                  <Icon w="4" h="4" as={IoIosArrowDown} />
+                </VStack>
               </HStack>
               <Input
                 type="number"
@@ -400,14 +444,7 @@ const AddLiquidity: NextPage = () => {
             </Box>
           )} */}
           {tokens[Field.INPUT] && tokens[Field.OUTPUT] && (
-            <VStack
-              align="stretch"
-              p="4"
-              bg="gray.100"
-              borderRadius="xl"
-              mt="4"
-              fontSize="xs"
-            >
+            <VStack align="stretch" p="4" bg="gray.100" borderRadius="xl">
               <HStack justify="space-between">
                 <Box>Share of Pool</Box>
                 <Box>{poolInfo.shareOfPool?.toSignificant(2) ?? "0"}%</Box>
@@ -416,7 +453,7 @@ const AddLiquidity: NextPage = () => {
               {poolInfo.totalSupply &&
                 parsedTokenAmounts[Field.INPUT]?.raw.toString() !== "0" &&
                 parsedTokenAmounts[Field.OUTPUT]?.raw.toString() !== "0" && (
-                  <HStack>
+                  <HStack justify="space-between">
                     <Box>LP tokens minted</Box>
                     <Box>
                       {poolInfo.totalSupply &&
@@ -435,7 +472,7 @@ const AddLiquidity: NextPage = () => {
             </VStack>
           )}
 
-          <Box pt="4">
+          <Box>
             <Button
               colorScheme="teal"
               w="100%"
@@ -446,8 +483,8 @@ const AddLiquidity: NextPage = () => {
               {isNeedApproved ? "approve tokens" : "add liquidity"}
             </Button>
           </Box>
-        </Box>
-      </HStack>
+        </VStack>
+      </VStack>
     </Box>
   );
 };

@@ -17,6 +17,7 @@
     "baseUrl": "src",
     "paths": {
       "@/abis/*": ["abis/*"],
+      "@/assets/*": ["assets/*"],
       "@/components/*": ["components/*"],
       "@/configs/*": ["configs/*"],
       "@/hooks/*": ["hooks/*"],

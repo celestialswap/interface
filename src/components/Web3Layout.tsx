@@ -33,6 +33,8 @@ import { RiFeedbackFill } from "react-icons/ri";
 import { AiOutlineSwap } from "react-icons/ai";
 import { GiFarmTractor } from "react-icons/gi";
 import { FiGrid, FiCommand } from "react-icons/fi";
+import useCurrentRoute from "@/hooks/useCurrentRoute";
+import { APP_ROUTE } from "../configs";
 
 const connectors = [
   {
@@ -51,6 +53,7 @@ const Web3Layout = ({ children }: { children: any }) => {
   const { connector, account } = useActiveWeb3React();
   const { connect } = useWallet();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const currentRoute = useCurrentRoute();
 
   const [activatingConnector, setActivatingConnector] = useState();
 
@@ -102,10 +105,16 @@ const Web3Layout = ({ children }: { children: any }) => {
 
       <HStack
         h={20}
-        px={12}
+        px={{ base: 2, md: 4, lg: 8, xl: 12 }}
         justify="space-between"
         borderBottom="1px solid"
         borderColor="gray.400"
+        pos="fixed"
+        top="0"
+        left="0"
+        right="0"
+        zIndex="1"
+        bg="white"
       >
         {/* <HStack>
           <Link href="/">home</Link>
@@ -134,17 +143,27 @@ const Web3Layout = ({ children }: { children: any }) => {
         borderColor="gray.400"
         zIndex="1"
         fontWeight="bold"
+        bg="white"
+        display={{ base: "none", lg: "block" }}
       >
-        <VStack h="100%" align="stretch" spacing="0">
-          <Box flex="1" pb="2" borderBottom="1px solid" borderColor="gray.400">
+        <VStack h="100%" align="stretch" spacing="2">
+          <VStack
+            align="stretch"
+            spacing="1"
+            flex="1"
+            pb="2"
+            borderBottom="1px solid"
+            borderColor="gray.400"
+          >
             <Link href="/swap" passHref>
               <Box
                 px="4"
                 py="3"
                 borderRadius="xl"
+                bg={currentRoute === APP_ROUTE.SWAP ? "gray.300" : ""}
                 _hover={{
                   cursor: "pointer",
-                  bg: "gray.200",
+                  bg: currentRoute === APP_ROUTE.SWAP ? "gray.300" : "gray.200",
                 }}
               >
                 <HStack>
@@ -158,9 +177,13 @@ const Web3Layout = ({ children }: { children: any }) => {
                 px="4"
                 py="3"
                 borderRadius="xl"
+                bg={currentRoute === APP_ROUTE.ADD_LIQUIDITY ? "gray.300" : ""}
                 _hover={{
                   cursor: "pointer",
-                  bg: "gray.200",
+                  bg:
+                    currentRoute === APP_ROUTE.ADD_LIQUIDITY
+                      ? "gray.300"
+                      : "gray.200",
                 }}
               >
                 <HStack>
@@ -174,9 +197,13 @@ const Web3Layout = ({ children }: { children: any }) => {
                 px="4"
                 py="3"
                 borderRadius="xl"
+                bg={currentRoute === APP_ROUTE.LIQUIDITY ? "gray.300" : ""}
                 _hover={{
                   cursor: "pointer",
-                  bg: "gray.200",
+                  bg:
+                    currentRoute === APP_ROUTE.LIQUIDITY
+                      ? "gray.300"
+                      : "gray.200",
                 }}
               >
                 <HStack>
@@ -201,9 +228,9 @@ const Web3Layout = ({ children }: { children: any }) => {
                 </HStack>
               </Box>
             </Link>
-          </Box>
-          <Box h="40" pt="2">
-            <HStack
+          </VStack>
+          <VStack align="stretch" spacing="1" h="7em" pt="2">
+            {/* <HStack
               justify="space-between"
               px="4"
               py="3"
@@ -218,7 +245,7 @@ const Web3Layout = ({ children }: { children: any }) => {
                 <Box>Settings</Box>
               </HStack>
               <Icon h="5" w="5" as={IoIosArrowForward} />
-            </HStack>
+            </HStack> */}
             <Box
               px="4"
               py="3"
@@ -247,10 +274,10 @@ const Web3Layout = ({ children }: { children: any }) => {
                 <Box>Feedback</Box>
               </HStack>
             </Box>
-          </Box>
+          </VStack>
         </VStack>
       </Box>
-      <Box h="calc(100vh - 5em)" ml="56" p="14">
+      <Box pt="32" pb="12" px="12" minH="100vh" ml={{ base: 0, lg: 56 }}>
         {children}
       </Box>
     </Box>

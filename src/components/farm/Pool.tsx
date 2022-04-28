@@ -8,6 +8,7 @@ import {
   Grid,
   GridItem,
   HStack,
+  Icon,
   Input,
   Modal,
   ModalBody,
@@ -30,6 +31,7 @@ import {
 } from "@ethersproject/units";
 import { Token, TokenAmount } from "@uniswap/sdk";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 
 const Pool = ({ pid }: { pid: number }) => {
   const { account, library } = useActiveWeb3React();
@@ -43,6 +45,7 @@ const Pool = ({ pid }: { pid: number }) => {
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [harvesting, setHarvesting] = useState<boolean>(false);
   const [refresh, setRefresh] = useState<boolean>(false);
+  const [isExpand, setIsExpand] = useState<boolean>(false);
 
   useEffect(() => {
     if (!account || !library) return;
@@ -191,11 +194,18 @@ const Pool = ({ pid }: { pid: number }) => {
       {loading ? (
         <Skeleton h="16" />
       ) : pool ? (
-        <Grid templateColumns="repeat(24  ,1fr)" gap="4">
-          <GridItem colSpan={6}>
+        <Grid
+          templateColumns="repeat(25,1fr)"
+          gap="4"
+          px="6"
+          py="4"
+          bg="gray.200"
+          borderRadius="xl"
+        >
+          <GridItem colSpan={8}>
             {pool.tokens.token0.symbol} - {pool.tokens.token1.symbol}
           </GridItem>
-          <GridItem colSpan={6}>
+          <GridItem colSpan={8}>
             {pool.pendingReward && pool.lpToken
               ? new TokenAmount(
                   pool.lpToken,
@@ -203,46 +213,65 @@ const Pool = ({ pid }: { pid: number }) => {
                 ).toSignificant(8)
               : "0"}
           </GridItem>
-          <GridItem colSpan={6}>--</GridItem>
-          <GridItem colSpan={6}>--</GridItem>
-          <GridItem colSpan={12}>
-            <HStack justify="space-between">
-              <Box>
-                deposited:{" "}
-                {pool?.userInfo?.amount && pool.lpToken
-                  ? new TokenAmount(
-                      pool.lpToken,
-                      pool.userInfo.amount.toString()
-                    ).toSignificant(8)
-                  : "0"}
-                {/* {formatEther(pool?.lpBalance?.toString() ?? "0").toString()} */}
-              </Box>
-              <Button colorScheme="teal" size="sm" onClick={onOpen}>
-                start farming
-              </Button>
+          <GridItem colSpan={4}>--</GridItem>
+          <GridItem colSpan={4}>--</GridItem>
+          <GridItem>
+            <HStack h="100%">
+              <Icon
+                cursor="pointer"
+                w="4"
+                h="4"
+                as={isExpand ? IoIosArrowUp : IoIosArrowDown}
+                onClick={() => setIsExpand((pre) => !pre)}
+              />
             </HStack>
           </GridItem>
-          <GridItem colSpan={12}>
-            <HStack justify="space-between">
-              <Box>
-                pending reward:
-                {pool.pendingReward && pool.lpToken
-                  ? new TokenAmount(
-                      pool.lpToken,
-                      pool.pendingReward.toString()
-                    ).toSignificant(8)
-                  : "0"}
-              </Box>
-              <Button
-                colorScheme="teal"
-                size="sm"
-                isLoading={harvesting}
-                onClick={onHarvestCallback}
-              >
-                harvest
-              </Button>
-            </HStack>
-          </GridItem>
+          {isExpand && (
+            <>
+              <GridItem colSpan={10}>
+                <HStack justify="space-between">
+                  <VStack align="flex-start" spacing="0">
+                    <Box fontSize="sm">Deposited</Box>
+                    <Box>
+                      {pool?.userInfo?.amount && pool.lpToken
+                        ? new TokenAmount(
+                            pool.lpToken,
+                            pool.userInfo.amount.toString()
+                          ).toSignificant(8)
+                        : "0"}
+                    </Box>
+                  </VStack>
+                  <Button colorScheme="teal" size="sm" onClick={onOpen}>
+                    start farming
+                  </Button>
+                </HStack>
+              </GridItem>
+              <GridItem colStart={14} colEnd={24}>
+                <HStack justify="space-between">
+                  <VStack align="flex-start" spacing="0">
+                    <Box fontSize="sm">Pending rewards</Box>
+                    <Box>
+                      {pool.pendingReward && pool.lpToken
+                        ? new TokenAmount(
+                            pool.lpToken,
+                            pool.pendingReward.toString()
+                          ).toSignificant(8)
+                        : "0"}{" "}
+                      RAY
+                    </Box>
+                  </VStack>
+                  <Button
+                    colorScheme="teal"
+                    size="sm"
+                    isLoading={harvesting}
+                    onClick={onHarvestCallback}
+                  >
+                    harvest
+                  </Button>
+                </HStack>
+              </GridItem>
+            </>
+          )}
         </Grid>
       ) : null}
     </>

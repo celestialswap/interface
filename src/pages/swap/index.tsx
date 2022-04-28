@@ -1,6 +1,14 @@
 import ListTokensModal from "@/components/ListTokensModal";
-import { BIPS_BASE, Field, ROUTER_ADDRESS } from "@/configs/networks";
+import { APP_ROUTE } from "@/configs/index";
+import {
+  BIPS_BASE,
+  Field,
+  ROUTER_ADDRESS,
+  SWAP_FEE_PERCENT,
+  WETH,
+} from "@/configs/networks";
 import { useActiveWeb3React } from "@/hooks/useActiveWeb3React";
+import useCurrentRoute from "@/hooks/useCurrentRoute";
 import { approves, getAllowances } from "@/state/erc20";
 import {
   EmptyPool,
@@ -12,12 +20,19 @@ import { getDerivedSwapInfo, swapCallback } from "@/state/swap";
 import {
   Box,
   Button,
+  Grid,
   HStack,
   Icon,
+  Image,
   Input,
+  InputGroup,
+  InputRightAddon,
+  Switch,
   useDisclosure,
+  VStack,
 } from "@chakra-ui/react";
-import { parseUnits } from "@ethersproject/units";
+import { BigNumber } from "@ethersproject/bignumber";
+import { formatEther, parseEther, parseUnits } from "@ethersproject/units";
 import {
   CurrencyAmount,
   Fraction,
@@ -28,6 +43,7 @@ import {
   Trade,
 } from "@uniswap/sdk";
 import type { NextPage } from "next";
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import { MdSwapVert } from "react-icons/md";
@@ -35,9 +51,10 @@ import { MdSwapVert } from "react-icons/md";
 const Swap: NextPage = () => {
   const { account, library } = useActiveWeb3React();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const currentRoute = useCurrentRoute();
 
   const [tokens, setTokens] = useState<{ [key in Field]: Token | undefined }>({
-    [Field.INPUT]: undefined,
+    [Field.INPUT]: WETH,
     [Field.OUTPUT]: undefined,
   });
   const [balances, setBalances] = useState<
@@ -54,11 +71,6 @@ const Swap: NextPage = () => {
   const [slippage, setSlippage] = useState<number>(0.5);
   const [disabledMultihops, setDisabledMultihops] = useState<boolean>(false);
   const [loadedPool, setLoadedPool] = useState<boolean>(false);
-
-  // console.count("render");
-  // useEffect(() => {
-  //   chainId && setToken0(WETH[chainId]);
-  // }, [chainId]);
 
   useEffect(() => {
     (async () => {
@@ -220,19 +232,62 @@ const Swap: NextPage = () => {
         callback={handleSelectToken}
       />
 
-      <HStack justify="center">
-        <Box
+      <VStack justify="center">
+        <Grid
+          templateColumns="repeat(2,1fr)"
+          bg="gray.300"
+          p="1"
+          borderRadius="3xl"
+          gap="1"
+          mb="8"
+        >
+          <Link href="/swap">
+            <Box
+              cursor="pointer"
+              bg={currentRoute === APP_ROUTE.SWAP ? "teal" : ""}
+              px="4"
+              py="2"
+              borderRadius="3xl"
+              color="white"
+              textAlign="center"
+              fontWeight="semibold"
+            >
+              Swap
+            </Box>
+          </Link>
+          <Link href="/liquidity">
+            <Box
+              flex="1"
+              cursor="pointer"
+              bg={currentRoute === APP_ROUTE.LIQUIDITY ? "teal" : ""}
+              px="4"
+              py="2"
+              borderRadius="3xl"
+              color="white"
+              textAlign="center"
+              fontWeight="semibold"
+            >
+              Liquidity
+            </Box>
+          </Link>
+        </Grid>
+
+        <VStack
+          align="stretch"
+          spacing="4"
           w="24em"
           border="1px solid"
           borderColor="gray.200"
           p="6"
           borderRadius="xl"
         >
-          {/* <HStack align="flex-end" justify="flex-end">
-              <Box> slippage</Box>
-              <InputGroup size="sm" w="32">
+          <HStack>
+            <Box flex="1">
+              <Box>Slippage</Box>
+              <InputGroup size="sm" w="6em">
                 <Input
                   type="number"
+                  textAlign="center"
                   value={slippage}
                   onChange={(e) => {
                     const value = +e.target.value;
@@ -245,32 +300,42 @@ const Swap: NextPage = () => {
                   children={<Box>%</Box>}
                 />
               </InputGroup>
-            </HStack>
+            </Box>
 
-            <HStack align="flex-end" justify="flex-end">
-              <Box>disable multihops</Box>
+            <Box flex="1" textAlign="right">
+              <Box>Multihops</Box>
               <Switch
                 isChecked={disabledMultihops}
                 onChange={(_) => setDisabledMultihops((pre) => !pre)}
               />
-            </HStack> */}
+            </Box>
+          </HStack>
 
           <Box p="4" bg="gray.100" borderRadius="xl">
             <HStack justify="space-between">
-              <Box>from</Box>
-              <Box>balance: {balances?.[0]?.toSignificant(6) ?? "--"}</Box>
+              <Box>From</Box>
+              {balances?.[0] && (
+                <Box>Balance: {balances?.[0]?.toSignificant(6) ?? "--"}</Box>
+              )}
             </HStack>
             <HStack>
               <HStack
                 _hover={{ color: "gray.500", cursor: "pointer" }}
                 onClick={() => handleOpenModal(Field.INPUT)}
               >
+                {tokens[Field.INPUT] && (
+                  <Image
+                    src="/anonymous-token.svg"
+                    fallbackSrc="/images/anonymous-token.svg"
+                    alt="icon"
+                  />
+                )}
                 <Box whiteSpace="nowrap">
                   {tokens[Field.INPUT]?.symbol ?? "--"}
                 </Box>
-                <Box borderRight="1px solid" pr="4">
-                  <Icon w="3" h="3" as={IoIosArrowDown} />
-                </Box>
+                <VStack borderRight="1px solid" pr="4">
+                  <Icon w="4" h="4" as={IoIosArrowDown} />
+                </VStack>
               </HStack>
               <Input
                 type="number"
@@ -293,7 +358,7 @@ const Swap: NextPage = () => {
               />
             </HStack>
           </Box>
-          <HStack justify="center" p="4">
+          <HStack justify="center">
             <Icon
               h="8"
               w="8"
@@ -317,21 +382,30 @@ const Swap: NextPage = () => {
           </HStack>
           <Box p="4" bg="gray.100" borderRadius="xl">
             <HStack justify="space-between">
-              <Box>to</Box>
-              <Box>balance: {balances?.[1]?.toSignificant(6)}</Box>
+              <Box>To</Box>
+              {balances?.[1] && (
+                <Box>Balance: {balances?.[1]?.toSignificant(6)}</Box>
+              )}
             </HStack>
             <HStack>
               <HStack
                 _hover={{ color: "gray.500", cursor: "pointer" }}
                 onClick={() => handleOpenModal(Field.OUTPUT)}
               >
+                {tokens[Field.OUTPUT] && (
+                  <Image
+                    src="/images/anonymous-token.svg"
+                    fallbackSrc="/images/anonymous-token.svg"
+                    alt="icon"
+                  />
+                )}
                 <Box whiteSpace="nowrap">
                   {tokens[Field.OUTPUT]?.symbol ?? "--"}
                 </Box>
 
-                <Box borderRight="1px solid" pr="4">
-                  <Icon w="3" h="3" as={IoIosArrowDown} />
-                </Box>
+                <VStack borderRight="1px solid" pr="4">
+                  <Icon w="4" h="4" as={IoIosArrowDown} />
+                </VStack>
               </HStack>
               <Input
                 type="number"
@@ -354,35 +428,15 @@ const Swap: NextPage = () => {
               />
             </HStack>
           </Box>
+
           {trade && (
-            <>
-              <Box>price: {trade?.executionPrice.toSignificant(6)}</Box>
-              <Box>
-                price impact: -
-                {parseFloat(trade?.priceImpact.toSignificant(6)).toFixed(2)}%
-              </Box>
-              <Box>
-                {slippage
-                  ? independentField === Field.INPUT
-                    ? `minimum received: ${trade
-                        ?.minimumAmountOut(
-                          new Percent(JSBI.BigInt(slippage * 100), BIPS_BASE)
-                        )
-                        .toSignificant(6)}`
-                    : `maximum sent: ${trade
-                        ?.maximumAmountIn(
-                          new Percent(JSBI.BigInt(slippage * 100), BIPS_BASE)
-                        )
-                        .toSignificant(6)}`
-                  : ""}
-              </Box>
-              <Box>
-                route path: {trade?.route.path.map((t) => t.symbol).join(" - ")}
-              </Box>
-            </>
+            <HStack justify="space-between">
+              <Box>Price</Box>
+              <Box>{trade?.executionPrice.toSignificant(6)}</Box>
+            </HStack>
           )}
 
-          <Box pt="4">
+          <Box>
             <Button
               colorScheme="teal"
               w="100%"
@@ -390,17 +444,72 @@ const Swap: NextPage = () => {
               isLoading={submitting}
               onClick={onSubmit}
             >
-              {loadedPool && !trade
-                ? "no route"
-                : poolInfo.noLiquidity && poolInfo.pair
-                ? "no liquidity"
-                : isNeedApproved
-                ? "approve token"
-                : "swap"}
+              {loadedPool && tokens[Field.INPUT] && tokens[Field.OUTPUT]
+                ? !trade
+                  ? poolInfo.pair
+                    ? "Swap"
+                    : "No route"
+                  : poolInfo.noLiquidity && poolInfo.pair
+                  ? "No liquidity"
+                  : isNeedApproved
+                  ? "Approve token"
+                  : "Swap"
+                : "Swap"}
             </Button>
           </Box>
-        </Box>
-      </HStack>
+          {trade && (
+            <Box>
+              <HStack justify="space-between">
+                <Box>Price Impact</Box>
+                <Box>
+                  {parseFloat(trade.priceImpact.toSignificant(6)).toFixed(2)}%
+                </Box>
+              </HStack>
+              <HStack justify="space-between">
+                <Box>
+                  {slippage
+                    ? independentField === Field.INPUT
+                      ? "Minimum received"
+                      : "Maximum sent"
+                    : ""}
+                </Box>
+                <Box>
+                  {slippage
+                    ? independentField === Field.INPUT
+                      ? trade
+                          .minimumAmountOut(
+                            new Percent(JSBI.BigInt(slippage * 100), BIPS_BASE)
+                          )
+                          .toSignificant(6)
+                      : trade
+                          .maximumAmountIn(
+                            new Percent(JSBI.BigInt(slippage * 100), BIPS_BASE)
+                          )
+                          .toSignificant(6)
+                    : ""}
+                </Box>
+              </HStack>
+              <HStack justify="space-between">
+                <Box>Liquidity Provider Fee</Box>
+                <Box>
+                  {parseFloat(
+                    formatEther(
+                      BigNumber.from(trade.inputAmount.raw.toString())
+                        .mul(BigNumber.from("3"))
+                        .div(BigNumber.from("100"))
+                    )
+                  ).toFixed(4)}{" "}
+                  {trade.route.input.symbol}
+                </Box>
+              </HStack>
+              <HStack justify="space-between">
+                <Box>Route</Box>
+                <Box>{trade?.route.path.map((t) => t.symbol).join(" > ")}</Box>
+              </HStack>
+            </Box>
+          )}
+        </VStack>
+      </VStack>
     </Box>
   );
 };

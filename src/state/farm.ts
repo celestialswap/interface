@@ -154,10 +154,7 @@ export const harvest = async (
   try {
     if (!amount) return;
     const masterChiefContract = getMasterChiefContract(library, account);
-    return callContract(masterChiefContract, "withdraw", [
-      pid,
-      amount.toString(),
-    ]);
+    return callContract(masterChiefContract, "withdraw", [pid, 0]);
   } catch (error) {
     throw error;
   }

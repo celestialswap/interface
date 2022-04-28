@@ -79,5 +79,6 @@ export const BETTER_TRADE_LESS_HOPS_THRESHOLD = new Percent(
 
 export const ZERO_PERCENT = new Percent("0");
 export const ONE_HUNDRED_PERCENT = new Percent("1");
+export const SWAP_FEE_PERCENT = new Percent(JSBI.BigInt(97), JSBI.BigInt(100));
 
 export const BIPS_BASE = JSBI.BigInt(10000);
