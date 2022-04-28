@@ -26,72 +26,38 @@ import { AiOutlineSwap } from "react-icons/ai";
 
 interface PoolProps {
   pool: PoolState;
-  setReload: Dispatch<SetStateAction<boolean>>;
 }
 
-const Pool = ({ pool, setReload }: PoolProps) => {
-  // console.log(pool.pair?.token0.symbol);
-  const { account, library } = useActiveWeb3React();
-
-  const [removePercent, setRemovePercent] = useState<number>(0);
-  const [showTooltip, setShowTooltip] = useState<boolean>(false);
-  const [submitting, setSubmitting] = useState<boolean>(false);
+const Pool = ({ pool }: PoolProps) => {
   const [isExpand, setIsExpand] = useState<boolean>(false);
-
-  const onRemoveLiquidityCallback = useCallback(() => {
-    (async () => {
-      try {
-        if (
-          !account ||
-          !library ||
-          !pool.pair ||
-          !pool.balanceOf ||
-          removePercent === 0
-        )
-          return;
-        const removeAmount = BigNumber.from(pool.balanceOf.raw.toString())
-          .mul(BigNumber.from(removePercent.toString()))
-          .div(BigNumber.from("100"));
-        setSubmitting(true);
-        await removeLiquidityCallback(
-          account,
-          library,
-          pool.pair,
-          removeAmount
-        );
-        setReload((pre) => !pre);
-        setSubmitting(false);
-      } catch (error) {
-        setSubmitting(false);
-        console.log(error);
-      }
-    })();
-  }, [account, library, pool, removePercent, setReload]);
 
   return (
     <VStack
       align="stretch"
       spacing="4"
-      border="1px solid"
-      borderColor="gray.300"
-      borderRadius="md"
+      border="2px solid #00ADEE"
+      borderRadius="3xl"
       p="4"
     >
       <HStack justify="space-between">
         <HStack spacing="4">
           <HStack spacing="1">
             <Image
-              src="/anonymous-token.svg"
+              src={`/images/${pool.pair?.token0.symbol}.svg`}
               fallbackSrc="/images/anonymous-token.svg"
               alt="icon"
+              w="6"
+              h="6"
             />
             <Image
-              src="/anonymous-token.svg"
+              src={`/images/${pool.pair?.token1.symbol}.svg`}
               fallbackSrc="/images/anonymous-token.svg"
               alt="icon"
+              w="6"
+              h="6"
             />
           </HStack>
-          <HStack spacing="1">
+          <HStack spacing="1" fontWeight="bold">
             <Box>{pool.pair?.token0.symbol}</Box>
             <Box>/</Box>
             <Box>{pool.pair?.token1.symbol}</Box>
@@ -124,11 +90,11 @@ const Pool = ({ pool, setReload }: PoolProps) => {
         <>
           <HStack justify="space-between">
             <Box>Share of pool</Box>
-            <Box>{pool.shareOfPool?.toSignificant(6)}%</Box>
+            <Box fontWeight="bold">{pool.shareOfPool?.toSignificant(6)}%</Box>
           </HStack>
           <HStack justify="space-between">
             <Box>{pool.pair?.token0?.symbol}</Box>
-            <Box>
+            <Box fontWeight="bold">
               {pool.shareOfPool &&
                 pool.pair?.reserve0 &&
                 pool.shareOfPool.multiply(pool.pair?.reserve0).toSignificant(6)}
@@ -136,77 +102,29 @@ const Pool = ({ pool, setReload }: PoolProps) => {
           </HStack>
           <HStack justify="space-between">
             <Box>{pool.pair?.token1?.symbol}</Box>
-            <Box>
+            <Box fontWeight="bold">
               {pool.shareOfPool &&
                 pool.pair?.reserve1 &&
                 pool.shareOfPool.multiply(pool.pair?.reserve1).toSignificant(6)}
             </Box>
           </HStack>
-          <Slider
-            id="slider"
-            value={removePercent}
-            min={0}
-            max={100}
-            colorScheme="teal"
-            onChange={(v) => setRemovePercent(v)}
-            onMouseEnter={() => setShowTooltip(true)}
-            onMouseLeave={() => setShowTooltip(false)}
-          >
-            <SliderMark value={25} mt="1" ml="-2.5" fontSize="sm">
-              25%
-            </SliderMark>
-            <SliderMark value={50} mt="1" ml="-2.5" fontSize="sm">
-              50%
-            </SliderMark>
-            <SliderMark value={75} mt="1" ml="-2.5" fontSize="sm">
-              75%
-            </SliderMark>
-            <SliderTrack>
-              <SliderFilledTrack />
-            </SliderTrack>
-            <Tooltip
-              hasArrow
-              bg="teal.500"
-              color="white"
-              placement="top"
-              isOpen={showTooltip}
-              label={`${removePercent}%`}
-            >
-              <SliderThumb />
-            </Tooltip>
-          </Slider>
-          <HStack pt="2">
-            <Link href="/liquidity/add" passHref>
-              <Button
-                size="sm"
-                colorScheme="telegram"
-                isLoading={submitting}
-                borderRadius="lg"
-              >
+
+          <HStack pt="2" color="white">
+            {/* <Link href="/liquidity/add" passHref>
+              <HStack bg="#00ADEE" p="3" borderRadius="3xl" cursor="pointer">
                 <Icon as={AiOutlineSwap} w="4" h="4" />
-              </Button>
-            </Link>
-
+              </HStack>
+            </Link> */}
             <Link href="/liquidity/add" passHref>
-              <Button
-                size="sm"
-                colorScheme="teal"
-                isLoading={submitting}
-                borderRadius="lg"
-              >
+              <HStack bg="#00ADEE" p="3" borderRadius="3xl" cursor="pointer">
                 <Icon as={IoAdd} w="4" h="4" />
-              </Button>
+              </HStack>
             </Link>
-
-            <Button
-              size="sm"
-              colorScheme="orange"
-              isLoading={submitting}
-              onClick={onRemoveLiquidityCallback}
-              borderRadius="lg"
-            >
-              <Icon as={BiMinus} w="4" h="4" />
-            </Button>
+            <Link href="/liquidity/remove" passHref>
+              <HStack bg="#c53f45e6" p="3" borderRadius="3xl" cursor="pointer">
+                <Icon as={BiMinus} w="4" h="4" />
+              </HStack>
+            </Link>
           </HStack>
         </>
       )}

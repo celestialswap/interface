@@ -2,4 +2,5 @@ export enum APP_ROUTE {
   SWAP,
   LIQUIDITY,
   ADD_LIQUIDITY,
+  FARM,
 }

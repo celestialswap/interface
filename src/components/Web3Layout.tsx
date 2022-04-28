@@ -18,6 +18,11 @@ import {
   useDisclosure,
   VStack,
   Icon,
+  Image as ChakraImage,
+  Drawer,
+  DrawerOverlay,
+  DrawerContent,
+  DrawerBody,
 } from "@chakra-ui/react";
 import Image from "next/image";
 import Link from "next/link";
@@ -30,7 +35,7 @@ import {
   IoMdGitNetwork,
 } from "react-icons/io";
 import { RiFeedbackFill } from "react-icons/ri";
-import { AiOutlineSwap } from "react-icons/ai";
+import { AiOutlineMenu, AiOutlineSwap } from "react-icons/ai";
 import { GiFarmTractor } from "react-icons/gi";
 import { FiGrid, FiCommand } from "react-icons/fi";
 import useCurrentRoute from "@/hooks/useCurrentRoute";
@@ -54,6 +59,16 @@ const Web3Layout = ({ children }: { children: any }) => {
   const { connect } = useWallet();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const currentRoute = useCurrentRoute();
+  const {
+    isOpen: isOpenMenu,
+    onOpen: onOpenMenu,
+    onClose: onCloseMenu,
+  } = useDisclosure();
+  const ref = React.useRef();
+
+  useEffect(() => {
+    isOpenMenu && onCloseMenu();
+  }, [currentRoute]);
 
   const [activatingConnector, setActivatingConnector] = useState();
 
@@ -70,7 +85,13 @@ const Web3Layout = ({ children }: { children: any }) => {
   }, [connect]);
 
   return (
-    <Box minH="100vh">
+    <Box
+      minH="100vh"
+      bgImage="/images/bg.jpg"
+      bgPos="center"
+      bgSize="cover"
+      bgRepeat="no-repeat"
+    >
       <Modal isOpen={!account && isOpen} onClose={onClose} isCentered size="xs">
         <ModalOverlay />
         <ModalContent>
@@ -83,8 +104,8 @@ const Web3Layout = ({ children }: { children: any }) => {
                   key={idx}
                   py={4}
                   justify="center"
-                  _hover={{ bg: "gray.200", cursor: "pointer", opacity: 0.8 }}
-                  borderRadius="md"
+                  _hover={{ bg: "gray.200", cursor: "pointer", opacity: 0.4 }}
+                  borderRadius="3xl"
                   onClick={() => connect(connector.connector)}
                 >
                   <Image
@@ -103,33 +124,164 @@ const Web3Layout = ({ children }: { children: any }) => {
         </ModalContent>
       </Modal>
 
+      <Drawer
+        isOpen={isOpenMenu}
+        placement="left"
+        onClose={onCloseMenu}
+        finalFocusRef={ref.current}
+      >
+        <DrawerOverlay />
+        <DrawerContent bg="#0a2d74e6" color="white">
+          <DrawerBody>
+            <VStack align="stretch" spacing="1" flex="1" py="6">
+              <Link href="/swap" passHref>
+                <Box
+                  px="4"
+                  py="3"
+                  borderRadius="3xl"
+                  bg={
+                    currentRoute === APP_ROUTE.SWAP
+                      ? "rgba(0, 173, 238, 0.6)"
+                      : ""
+                  }
+                  _hover={{
+                    cursor: "pointer",
+                    bg:
+                      currentRoute === APP_ROUTE.SWAP
+                        ? "rgba(0, 173, 238, 0.6)"
+                        : "rgba(0, 173, 238, 0.2)",
+                  }}
+                >
+                  <HStack>
+                    <Icon h="6" w="6" as={AiOutlineSwap} />
+                    <Box>Swap</Box>
+                  </HStack>
+                </Box>
+              </Link>
+              <Link href="/liquidity/add" passHref>
+                <Box
+                  px="4"
+                  py="3"
+                  borderRadius="3xl"
+                  bg={
+                    currentRoute === APP_ROUTE.ADD_LIQUIDITY
+                      ? "rgba(0, 173, 238, 0.6)"
+                      : ""
+                  }
+                  _hover={{
+                    cursor: "pointer",
+                    bg:
+                      currentRoute === APP_ROUTE.ADD_LIQUIDITY
+                        ? "rgba(0, 173, 238, 0.6)"
+                        : "rgba(0, 173, 238, 0.2)",
+                  }}
+                >
+                  <HStack>
+                    <Icon h="6" w="6" as={IoMdGitNetwork} />
+                    <Box>Liquidity</Box>
+                  </HStack>
+                </Box>
+              </Link>
+              <Link href="/liquidity" passHref>
+                <Box
+                  px="4"
+                  py="3"
+                  borderRadius="3xl"
+                  bg={
+                    currentRoute === APP_ROUTE.LIQUIDITY
+                      ? "rgba(0, 173, 238, 0.6)"
+                      : ""
+                  }
+                  _hover={{
+                    cursor: "pointer",
+                    bg:
+                      currentRoute === APP_ROUTE.LIQUIDITY
+                        ? "rgba(0, 173, 238, 0.6)"
+                        : "rgba(0, 173, 238, 0.2)",
+                  }}
+                >
+                  <HStack>
+                    <Icon h="6" w="6" as={FiGrid} />
+                    <Box>Pools</Box>
+                  </HStack>
+                </Box>
+              </Link>
+              <Link href="/farm" passHref>
+                <Box
+                  px="4"
+                  py="3"
+                  borderRadius="3xl"
+                  bg={
+                    currentRoute === APP_ROUTE.FARM
+                      ? "rgba(0, 173, 238, 0.6)"
+                      : ""
+                  }
+                  _hover={{
+                    cursor: "pointer",
+                    bg:
+                      currentRoute === APP_ROUTE.FARM
+                        ? "rgba(0, 173, 238, 0.6)"
+                        : "rgba(0, 173, 238, 0.2)",
+                  }}
+                >
+                  <HStack>
+                    <Icon h="6" w="6" as={GiFarmTractor} />
+                    <Box>Farm</Box>
+                  </HStack>
+                </Box>
+              </Link>
+            </VStack>
+          </DrawerBody>
+        </DrawerContent>
+      </Drawer>
+
       <HStack
         h={20}
-        px={{ base: 2, md: 4, lg: 8, xl: 12 }}
+        px={{ base: 4, md: 6, lg: 8, xl: 12 }}
         justify="space-between"
-        borderBottom="1px solid"
-        borderColor="gray.400"
         pos="fixed"
         top="0"
         left="0"
         right="0"
-        zIndex="1"
-        bg="white"
+        zIndex="2"
+        bg="rgba(0, 173, 238, 0.1)"
       >
-        {/* <HStack>
-          <Link href="/">home</Link>
-          <Link href="/swap">swap</Link>
-          <Link href="/liquidity">liquidity</Link>
-          <Link href="/farm">farm</Link>
-        </HStack> */}
-        <Box>Logo</Box>
-        <Button
-          colorScheme="teal"
+        <HStack>
+          <Icon
+            as={AiOutlineMenu}
+            w="8"
+            h="8"
+            color="white"
+            cursor="pointer"
+            ref={ref.current}
+            onClick={onOpenMenu}
+            display={{ base: "block", lg: "none" }}
+          />
+
+          <ChakraImage
+            display={{ base: "none", lg: "block" }}
+            src="/images/logo.png"
+            w="12em"
+            h="12em"
+          />
+          <ChakraImage
+            display={{ base: "block", lg: "none" }}
+            src="/images/logo-mini.png"
+            w="4.5em"
+            h="4.5em"
+          />
+        </HStack>
+
+        <Box
           onClick={() => (account ? null : onOpen())}
-          borderRadius="xl"
+          borderRadius="3xl"
+          bgImage="linear-gradient(90deg,#00ADEE,#24CBFF)"
+          px="4"
+          py="2"
+          cursor="pointer"
         >
           {account ? formatAddress(account) : "connect wallet"}
-        </Button>
+        </Box>
       </HStack>
       <Box
         w="56"
@@ -139,12 +291,11 @@ const Web3Layout = ({ children }: { children: any }) => {
         bottom="0"
         py="2"
         px="4"
-        borderRight="1px solid"
-        borderColor="gray.400"
-        zIndex="1"
+        zIndex="2"
         fontWeight="bold"
-        bg="white"
         display={{ base: "none", lg: "block" }}
+        bg="rgba(0, 173, 238, 0.1)"
+        color="white"
       >
         <VStack h="100%" align="stretch" spacing="2">
           <VStack
@@ -159,11 +310,18 @@ const Web3Layout = ({ children }: { children: any }) => {
               <Box
                 px="4"
                 py="3"
-                borderRadius="xl"
-                bg={currentRoute === APP_ROUTE.SWAP ? "gray.300" : ""}
+                borderRadius="3xl"
+                bg={
+                  currentRoute === APP_ROUTE.SWAP
+                    ? "rgba(0, 173, 238, 0.6)"
+                    : ""
+                }
                 _hover={{
                   cursor: "pointer",
-                  bg: currentRoute === APP_ROUTE.SWAP ? "gray.300" : "gray.200",
+                  bg:
+                    currentRoute === APP_ROUTE.SWAP
+                      ? "rgba(0, 173, 238, 0.6)"
+                      : "rgba(0, 173, 238, 0.2)",
                 }}
               >
                 <HStack>
@@ -176,14 +334,18 @@ const Web3Layout = ({ children }: { children: any }) => {
               <Box
                 px="4"
                 py="3"
-                borderRadius="xl"
-                bg={currentRoute === APP_ROUTE.ADD_LIQUIDITY ? "gray.300" : ""}
+                borderRadius="3xl"
+                bg={
+                  currentRoute === APP_ROUTE.ADD_LIQUIDITY
+                    ? "rgba(0, 173, 238, 0.6)"
+                    : ""
+                }
                 _hover={{
                   cursor: "pointer",
                   bg:
                     currentRoute === APP_ROUTE.ADD_LIQUIDITY
-                      ? "gray.300"
-                      : "gray.200",
+                      ? "rgba(0, 173, 238, 0.6)"
+                      : "rgba(0, 173, 238, 0.2)",
                 }}
               >
                 <HStack>
@@ -196,14 +358,18 @@ const Web3Layout = ({ children }: { children: any }) => {
               <Box
                 px="4"
                 py="3"
-                borderRadius="xl"
-                bg={currentRoute === APP_ROUTE.LIQUIDITY ? "gray.300" : ""}
+                borderRadius="3xl"
+                bg={
+                  currentRoute === APP_ROUTE.LIQUIDITY
+                    ? "rgba(0, 173, 238, 0.6)"
+                    : ""
+                }
                 _hover={{
                   cursor: "pointer",
                   bg:
                     currentRoute === APP_ROUTE.LIQUIDITY
-                      ? "gray.300"
-                      : "gray.200",
+                      ? "rgba(0, 173, 238, 0.6)"
+                      : "rgba(0, 173, 238, 0.2)",
                 }}
               >
                 <HStack>
@@ -216,10 +382,18 @@ const Web3Layout = ({ children }: { children: any }) => {
               <Box
                 px="4"
                 py="3"
-                borderRadius="xl"
+                borderRadius="3xl"
+                bg={
+                  currentRoute === APP_ROUTE.FARM
+                    ? "rgba(0, 173, 238, 0.6)"
+                    : ""
+                }
                 _hover={{
                   cursor: "pointer",
-                  bg: "gray.200",
+                  bg:
+                    currentRoute === APP_ROUTE.FARM
+                      ? "rgba(0, 173, 238, 0.6)"
+                      : "rgba(0, 173, 238, 0.2)",
                 }}
               >
                 <HStack>
@@ -234,7 +408,7 @@ const Web3Layout = ({ children }: { children: any }) => {
               justify="space-between"
               px="4"
               py="3"
-              borderRadius="xl"
+              borderRadius="3xl"
               _hover={{
                 cursor: "pointer",
                 bg: "gray.200",
@@ -249,10 +423,10 @@ const Web3Layout = ({ children }: { children: any }) => {
             <Box
               px="4"
               py="3"
-              borderRadius="xl"
+              borderRadius="3xl"
               _hover={{
                 cursor: "pointer",
-                bg: "gray.200",
+                bg: "rgba(0, 173, 238, 0.3)",
               }}
             >
               <HStack>
@@ -263,10 +437,10 @@ const Web3Layout = ({ children }: { children: any }) => {
             <Box
               px="4"
               py="3"
-              borderRadius="xl"
+              borderRadius="3xl"
               _hover={{
                 cursor: "pointer",
-                bg: "gray.200",
+                bg: "rgba(0, 173, 238, 0.3)",
               }}
             >
               <HStack>
@@ -277,7 +451,18 @@ const Web3Layout = ({ children }: { children: any }) => {
           </VStack>
         </VStack>
       </Box>
-      <Box pt="32" pb="12" px="12" minH="100vh" ml={{ base: 0, lg: 56 }}>
+      <Box
+        pos="fixed"
+        top="20"
+        left={{ base: 0, lg: 56 }}
+        right="0"
+        bottom="0"
+        px={{ base: 2, lg: 12 }}
+        py="12"
+        bg="rgba(0, 173, 238, 0.2)"
+        overflowY="scroll"
+        color="white"
+      >
         {children}
       </Box>
     </Box>

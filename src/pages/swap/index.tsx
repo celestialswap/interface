@@ -235,16 +235,21 @@ const Swap: NextPage = () => {
       <VStack justify="center">
         <Grid
           templateColumns="repeat(2,1fr)"
-          bg="gray.300"
           p="1"
           borderRadius="3xl"
           gap="1"
           mb="8"
+          border="2px solid #00ADEE"
+          bg="#0a2d74b3"
         >
           <Link href="/swap">
             <Box
               cursor="pointer"
-              bg={currentRoute === APP_ROUTE.SWAP ? "teal" : ""}
+              bgImage={
+                currentRoute === APP_ROUTE.SWAP
+                  ? "linear-gradient(90deg,#00ADEE,#24CBFF)"
+                  : ""
+              }
               px="4"
               py="2"
               borderRadius="3xl"
@@ -259,7 +264,11 @@ const Swap: NextPage = () => {
             <Box
               flex="1"
               cursor="pointer"
-              bg={currentRoute === APP_ROUTE.LIQUIDITY ? "teal" : ""}
+              bgImage={
+                currentRoute === APP_ROUTE.LIQUIDITY
+                  ? "linear-gradient(90deg,#00ADEE,#24CBFF)"
+                  : ""
+              }
               px="4"
               py="2"
               borderRadius="3xl"
@@ -275,20 +284,28 @@ const Swap: NextPage = () => {
         <VStack
           align="stretch"
           spacing="4"
-          w="24em"
-          border="1px solid"
-          borderColor="gray.200"
+          w={{ base: "100%", lg: "24em" }}
+          border="2px solid #00ADEE"
+          bg="#0a2d74b3"
           p="6"
-          borderRadius="xl"
+          borderRadius="3xl"
         >
           <HStack>
             <Box flex="1">
               <Box>Slippage</Box>
-              <InputGroup size="sm" w="6em">
+              <InputGroup
+                size="sm"
+                w="6em"
+                border="1px solid #00ADEE"
+                borderRadius="3xl"
+                overflow="hidden"
+              >
                 <Input
                   type="number"
                   textAlign="center"
                   value={slippage}
+                  borderRadius="3xl"
+                  bg="transparent"
                   onChange={(e) => {
                     const value = +e.target.value;
                     if (value === 0 || value >= 100) return;
@@ -296,8 +313,10 @@ const Swap: NextPage = () => {
                   }}
                 />
                 <InputRightAddon
+                  bg="transparent"
+                  borderRadius="3xl"
                   // eslint-disable-next-line react/no-children-prop
-                  children={<Box>%</Box>}
+                  children={<Box> %</Box>}
                 />
               </InputGroup>
             </Box>
@@ -305,13 +324,14 @@ const Swap: NextPage = () => {
             <Box flex="1" textAlign="right">
               <Box>Multihops</Box>
               <Switch
+                bg="#0a2d74b3"
                 isChecked={disabledMultihops}
                 onChange={(_) => setDisabledMultihops((pre) => !pre)}
               />
             </Box>
           </HStack>
 
-          <Box p="4" bg="gray.100" borderRadius="xl">
+          <Box p="4" border="2px solid #00ADEE" borderRadius="3xl">
             <HStack justify="space-between">
               <Box>From</Box>
               {balances?.[0] && (
@@ -325,9 +345,11 @@ const Swap: NextPage = () => {
               >
                 {tokens[Field.INPUT] && (
                   <Image
-                    src="/anonymous-token.svg"
+                    src={`/images/${tokens[Field.INPUT]?.symbol}.svg`}
                     fallbackSrc="/images/anonymous-token.svg"
                     alt="icon"
+                    w="6"
+                    h="6"
                   />
                 )}
                 <Box whiteSpace="nowrap">
@@ -364,7 +386,7 @@ const Swap: NextPage = () => {
               w="8"
               as={MdSwapVert}
               cursor="pointer"
-              bg="gray.100"
+              border="2px solid #00ADEE"
               p="1"
               borderRadius="3em"
               onClick={() => {
@@ -380,7 +402,7 @@ const Swap: NextPage = () => {
               }}
             />
           </HStack>
-          <Box p="4" bg="gray.100" borderRadius="xl">
+          <Box p="4" border="2px solid #00ADEE" borderRadius="3xl">
             <HStack justify="space-between">
               <Box>To</Box>
               {balances?.[1] && (
@@ -394,9 +416,11 @@ const Swap: NextPage = () => {
               >
                 {tokens[Field.OUTPUT] && (
                   <Image
-                    src="/images/anonymous-token.svg"
+                    src={`/images/${tokens[Field.OUTPUT]?.symbol}.svg`}
                     fallbackSrc="/images/anonymous-token.svg"
                     alt="icon"
+                    w="6"
+                    h="6"
                   />
                 )}
                 <Box whiteSpace="nowrap">
@@ -432,17 +456,27 @@ const Swap: NextPage = () => {
           {trade && (
             <HStack justify="space-between">
               <Box>Price</Box>
-              <Box>{trade?.executionPrice.toSignificant(6)}</Box>
+              <HStack>
+                <Box fontWeight="bold">
+                  {trade?.executionPrice.toSignificant(6)}
+                </Box>
+                <Box>
+                  {tokens[Field.OUTPUT]?.symbol} / {tokens[Field.INPUT]?.symbol}
+                </Box>
+              </HStack>
             </HStack>
           )}
 
           <Box>
             <Button
-              colorScheme="teal"
               w="100%"
               isDisabled={isDisableBtn}
               isLoading={submitting}
               onClick={onSubmit}
+              bgImage="linear-gradient(90deg,#00ADEE,#24CBFF)"
+              _hover={{}}
+              _focus={{}}
+              borderRadius="3xl"
             >
               {loadedPool && tokens[Field.INPUT] && tokens[Field.OUTPUT]
                 ? !trade
@@ -461,7 +495,7 @@ const Swap: NextPage = () => {
             <Box>
               <HStack justify="space-between">
                 <Box>Price Impact</Box>
-                <Box>
+                <Box fontWeight="bold">
                   {parseFloat(trade.priceImpact.toSignificant(6)).toFixed(2)}%
                 </Box>
               </HStack>
@@ -473,7 +507,7 @@ const Swap: NextPage = () => {
                       : "Maximum sent"
                     : ""}
                 </Box>
-                <Box>
+                <Box fontWeight="bold">
                   {slippage
                     ? independentField === Field.INPUT
                       ? trade
@@ -491,7 +525,7 @@ const Swap: NextPage = () => {
               </HStack>
               <HStack justify="space-between">
                 <Box>Liquidity Provider Fee</Box>
-                <Box>
+                <Box fontWeight="bold">
                   {parseFloat(
                     formatEther(
                       BigNumber.from(trade.inputAmount.raw.toString())
@@ -504,7 +538,9 @@ const Swap: NextPage = () => {
               </HStack>
               <HStack justify="space-between">
                 <Box>Route</Box>
-                <Box>{trade?.route.path.map((t) => t.symbol).join(" > ")}</Box>
+                <Box fontWeight="bold">
+                  {trade?.route.path.map((t) => t.symbol).join(" > ")}
+                </Box>
               </HStack>
             </Box>
           )}

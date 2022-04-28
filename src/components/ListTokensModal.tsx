@@ -26,21 +26,35 @@ const ListTokensModal = ({
 }: ListTokensModalProps) => {
   const listTokens = useListTokens();
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal isOpen={isOpen} onClose={onClose} size="sm">
       <ModalOverlay />
-      <ModalContent>
-        <ModalHeader>select a token</ModalHeader>
-        <ModalCloseButton />
+      <ModalContent
+        border="2px solid #00ADEE"
+        borderRadius="3xl"
+        bg="#0a2d74e6"
+        color="white"
+      >
+        <ModalHeader>Select a token</ModalHeader>
+        <ModalCloseButton borderRadius="3xl" _focus={{}} />
         <ModalBody>
-          <Input placeholder="enter token address" />
+          <Input
+            placeholder="enter token address"
+            outline="1px solid #00ADEE"
+            border="none"
+            borderRadius="3xl"
+            _focus={{}}
+            _hover={{}}
+          />
           <Box mt="2">
             {listTokens.map((token, idx) => (
               <HStack
                 key={idx}
                 fontSize="sm"
-                _hover={{ bg: "gray.400", cursor: "pointer" }}
+                borderRadius="3xl"
+                px="6"
+                py="4"
+                _hover={{ bg: "rgba(0, 173, 238, 0.2)", cursor: "pointer" }}
                 onClick={() => callback(token)}
-                p="2"
               >
                 <Box>{token.symbol}</Box>
                 <Box>-</Box>

@@ -270,22 +270,23 @@ const AddLiquidity: NextPage = () => {
         <VStack
           align="stretch"
           spacing="4"
-          w="24em"
-          border="1px solid"
-          borderColor="gray.200"
+          w={{ base: "100%", lg: "24em" }}
           p="6"
-          borderRadius="xl"
+          borderRadius="3xl"
+          bg="#0a2d74b3"
+          border="2px solid #00ADEE"
         >
           <Box>
             <Box
               bg="gray.200"
-              p="3"
               borderRadius="3xl"
               fontWeight="bold"
               fontSize="lg"
-              // color="white"
               textAlign="center"
               pos="relative"
+              bgImage="linear-gradient(90deg,#00ADEE,#24CBFF)"
+              px="4"
+              py="4"
             >
               <Icon
                 as={IoArrowBack}
@@ -299,9 +300,9 @@ const AddLiquidity: NextPage = () => {
               Add Liquidity
             </Box>
           </Box>
-          <Box p="4" bg="gray.100" borderRadius="xl">
+          <Box p="4" border="2px solid #00ADEE" borderRadius="3xl">
             <HStack justify="flex-end">
-              <Box>balance: {balances?.[0]?.toSignificant(6)}</Box>
+              <Box>Balance: {balances?.[0]?.toSignificant(6)}</Box>
             </HStack>
             <HStack>
               <HStack
@@ -310,9 +311,11 @@ const AddLiquidity: NextPage = () => {
               >
                 {tokens[Field.INPUT] && (
                   <Image
-                    src="/images/anonymous-token.svg"
+                    src={`/images/${tokens[Field.INPUT]?.symbol}.svg`}
                     fallbackSrc="/images/anonymous-token.svg"
                     alt="icon"
+                    w="6"
+                    h="6"
                   />
                 )}
                 <Box whiteSpace="nowrap">
@@ -345,7 +348,7 @@ const AddLiquidity: NextPage = () => {
               w="8"
               as={IoIosAdd}
               cursor="pointer"
-              bg="gray.100"
+              border="2px solid #00ADEE"
               p="1"
               borderRadius="3em"
             />
@@ -356,7 +359,7 @@ const AddLiquidity: NextPage = () => {
                   w="8"
                   as={AiOutlineSwap}
                   cursor="pointer"
-                  bg="gray.100"
+                  border="2px solid #00ADEE"
                   p="1"
                   borderRadius="3em"
                   onClick={() => {
@@ -377,9 +380,9 @@ const AddLiquidity: NextPage = () => {
               </HStack>
             )}
           </HStack>
-          <Box p="4" bg="gray.100" borderRadius="xl">
+          <Box p="4" border="2px solid #00ADEE" borderRadius="3xl">
             <HStack justify="flex-end">
-              <Box>balance: {balances?.[1]?.toSignificant(6)}</Box>
+              <Box>Balance: {balances?.[1]?.toSignificant(6)}</Box>
             </HStack>
             <HStack>
               <HStack
@@ -388,9 +391,11 @@ const AddLiquidity: NextPage = () => {
               >
                 {tokens[Field.OUTPUT] && (
                   <Image
-                    src="/images/anonymous-token.svg"
+                    src={`/images/${tokens[Field.OUTPUT]?.symbol}.svg`}
                     fallbackSrc="/images/anonymous-token.svg"
                     alt="icon"
+                    w="6"
+                    h="6"
                   />
                 )}
                 <Box whiteSpace="nowrap">
@@ -444,7 +449,12 @@ const AddLiquidity: NextPage = () => {
             </Box>
           )} */}
           {tokens[Field.INPUT] && tokens[Field.OUTPUT] && (
-            <VStack align="stretch" p="4" bg="gray.100" borderRadius="xl">
+            <VStack
+              align="stretch"
+              p="4"
+              border="2px solid #00ADEE"
+              borderRadius="3xl"
+            >
               <HStack justify="space-between">
                 <Box>Share of Pool</Box>
                 <Box>{poolInfo.shareOfPool?.toSignificant(2) ?? "0"}%</Box>
@@ -474,13 +484,16 @@ const AddLiquidity: NextPage = () => {
 
           <Box>
             <Button
-              colorScheme="teal"
               w="100%"
               isDisabled={isDisableBtn}
               isLoading={submitting}
               onClick={onSubmit}
+              bgImage="linear-gradient(90deg,#00ADEE,#24CBFF)"
+              _hover={{}}
+              _focus={{}}
+              borderRadius="3xl"
             >
-              {isNeedApproved ? "approve tokens" : "add liquidity"}
+              {isNeedApproved ? "Approve tokens" : "Add liquidity"}
             </Button>
           </Box>
         </VStack>

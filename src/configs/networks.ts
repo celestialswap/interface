@@ -16,8 +16,8 @@ export const WETH: Token = new Token(
   NETWORKS_SUPPORTED.chainId,
   "0xae13d989dac2f0debff460ac112a837c89baa7cd",
   18,
-  "BNB",
-  "BNB"
+  "WBNB",
+  "WBNB"
 );
 
 // used to construct intermediary pairs for trading

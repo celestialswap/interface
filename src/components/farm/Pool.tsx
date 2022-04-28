@@ -18,7 +18,13 @@ import {
   ModalOverlay,
   Select,
   Skeleton,
+  Slider,
+  SliderFilledTrack,
+  SliderMark,
+  SliderThumb,
+  SliderTrack,
   Stack,
+  Tooltip,
   useDisclosure,
   VStack,
 } from "@chakra-ui/react";
@@ -46,6 +52,7 @@ const Pool = ({ pid }: { pid: number }) => {
   const [harvesting, setHarvesting] = useState<boolean>(false);
   const [refresh, setRefresh] = useState<boolean>(false);
   const [isExpand, setIsExpand] = useState<boolean>(false);
+  const [showTooltip, setShowTooltip] = useState<boolean>(false);
 
   useEffect(() => {
     if (!account || !library) return;
@@ -140,14 +147,24 @@ const Pool = ({ pid }: { pid: number }) => {
       {pool && (
         <Modal isOpen={isOpen} onClose={onClose}>
           <ModalOverlay />
-          <ModalContent>
+          <ModalContent
+            border="2px solid #00ADEE"
+            borderRadius="3xl"
+            bg="#0a2d74e6"
+            color="white"
+            pb="4"
+          >
             <ModalHeader>add lp token to farm</ModalHeader>
-            <ModalCloseButton />
+            <ModalCloseButton borderRadius="3xl" _focus={{}} />
             <ModalBody>
               <VStack spacing="4" justify="stretch" align="stretch">
                 <Box>balance: {pool.lpBalance?.toSignificant(10)}</Box>
                 <Input
                   type="number"
+                  outline="2px solid #00ADEE"
+                  border="none"
+                  borderRadius="3xl"
+                  placeholder="enter an amount"
                   value={farmingAmount?.toSignificant(10) ?? ""}
                   onChange={(e) => {
                     if (!e.target.value) return setFarmingAmount(undefined);
@@ -168,39 +185,68 @@ const Pool = ({ pid }: { pid: number }) => {
                   }}
                 />
 
-                <Select
+                <Slider
+                  id="slider"
                   value={lockTime}
-                  onChange={(e) => setLockTime(+(e.target.value || 0))}
+                  min={0}
+                  max={20}
+                  colorScheme="#00ADEE"
+                  onChange={(v) => setLockTime(v)}
+                  onMouseEnter={() => setShowTooltip(true)}
+                  onMouseLeave={() => setShowTooltip(false)}
                 >
-                  {new Array(90).fill("").map((_, idx) => (
-                    <option key={idx} value={idx + 1}>
-                      {idx + 1} days
-                    </option>
-                  ))}
-                </Select>
+                  <SliderMark value={5} mt="1" ml="-2.5" fontSize="sm">
+                    5
+                  </SliderMark>
+                  <SliderMark value={10} mt="1" ml="-2.5" fontSize="sm">
+                    10
+                  </SliderMark>
+                  <SliderMark value={15} mt="1" ml="-2.5" fontSize="sm">
+                    15
+                  </SliderMark>
+                  <SliderTrack>
+                    <SliderFilledTrack />
+                  </SliderTrack>
+                  <Tooltip
+                    hasArrow
+                    bg="#00ADEE"
+                    color="white"
+                    placement="top"
+                    isOpen={showTooltip}
+                    label={`${lockTime} days`}
+                  >
+                    <SliderThumb />
+                  </Tooltip>
+                </Slider>
 
-                <Button
-                  colorScheme="teal"
-                  isLoading={submitting}
-                  onClick={onSubmit}
-                >
-                  {isNeedApproved ? "approve lp token" : "start farming"}
-                </Button>
+                <Box pt="2">
+                  <Button
+                    w="100%"
+                    isLoading={submitting}
+                    onClick={onSubmit}
+                    bgImage="linear-gradient(90deg,#00ADEE,#24CBFF)"
+                    _hover={{}}
+                    _focus={{}}
+                    borderRadius="3xl"
+                  >
+                    {isNeedApproved ? "approve lp token" : "start farming"}
+                  </Button>
+                </Box>
               </VStack>
             </ModalBody>
           </ModalContent>
         </Modal>
       )}
       {loading ? (
-        <Skeleton h="16" />
+        <Skeleton h="16" startColor="#00ADEE" endColor="#00ADEE" />
       ) : pool ? (
         <Grid
           templateColumns="repeat(25,1fr)"
           gap="4"
           px="6"
           py="4"
-          bg="gray.200"
-          borderRadius="xl"
+          border="2px solid #00ADEE"
+          borderRadius="3xl"
         >
           <GridItem colSpan={8}>
             {pool.tokens.token0.symbol} - {pool.tokens.token1.symbol}
@@ -241,7 +287,15 @@ const Pool = ({ pid }: { pid: number }) => {
                         : "0"}
                     </Box>
                   </VStack>
-                  <Button colorScheme="teal" size="sm" onClick={onOpen}>
+                  <Button
+                    size="sm"
+                    onClick={onOpen}
+                    bgImage="linear-gradient(90deg,#00ADEE,#24CBFF)"
+                    _hover={{}}
+                    _focus={{}}
+                    borderRadius="3xl"
+                    _active={{}}
+                  >
                     start farming
                   </Button>
                 </HStack>
@@ -265,6 +319,11 @@ const Pool = ({ pid }: { pid: number }) => {
                     size="sm"
                     isLoading={harvesting}
                     onClick={onHarvestCallback}
+                    bgImage="linear-gradient(90deg,#00ADEE,#24CBFF)"
+                    _hover={{}}
+                    _focus={{}}
+                    borderRadius="3xl"
+                    _active={{}}
                   >
                     harvest
                   </Button>

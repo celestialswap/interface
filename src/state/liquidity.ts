@@ -131,6 +131,7 @@ export const getPoolInfo = async (
 
   return {
     pair,
+    balanceOf: new TokenAmount(pair.liquidityToken, balanceOf),
     inputIsToken0: isTokenA0,
     prices,
     shareOfPool: new Percent(balanceOf, totalSupply),
