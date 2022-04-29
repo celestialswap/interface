@@ -43,14 +43,14 @@ const Pool = ({ pool }: PoolProps) => {
         <HStack spacing="4">
           <HStack spacing="1">
             <Image
-              src={`/images/${pool.pair?.token0.symbol}.svg`}
+              src={`/images/${pool.pair?.token0.address.toLowerCase()}.svg`}
               fallbackSrc="/images/anonymous-token.svg"
               alt="icon"
               w="6"
               h="6"
             />
             <Image
-              src={`/images/${pool.pair?.token1.symbol}.svg`}
+              src={`/images/${pool.pair?.token1.address.toLowerCase()}.svg`}
               fallbackSrc="/images/anonymous-token.svg"
               alt="icon"
               w="6"

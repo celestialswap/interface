@@ -404,7 +404,9 @@ const AddLiquidity: NextPage = () => {
               >
                 {tokens[Field.INPUT] && (
                   <Image
-                    src={`/images/${tokens[Field.INPUT]?.symbol}.svg`}
+                    src={`/images/${tokens[
+                      Field.INPUT
+                    ]?.address.toLowerCase()}.svg`}
                     fallbackSrc="/images/anonymous-token.svg"
                     alt="icon"
                     w="6"
@@ -515,7 +517,9 @@ const AddLiquidity: NextPage = () => {
               >
                 {tokens[Field.OUTPUT] && (
                   <Image
-                    src={`/images/${tokens[Field.OUTPUT]?.symbol}.svg`}
+                    src={`/images/${tokens[
+                      Field.OUTPUT
+                    ]?.address.toLowerCase()}.svg`}
                     fallbackSrc="/images/anonymous-token.svg"
                     alt="icon"
                     w="6"
