@@ -31,17 +31,20 @@ import type { NextPage } from "next";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Field, ROUTER_ADDRESS, WETH } from "@/configs/networks";
 import { parseUnits, formatUnits } from "@ethersproject/units";
-import { approves, getAllowances } from "@/state/erc20";
+import { approves, getAllowances, getToken } from "@/state/erc20";
 import { IoIosArrowDown, IoIosAdd } from "react-icons/io";
 import { AiOutlineSwap } from "react-icons/ai";
 import Link from "next/link";
 import { IoArrowBack } from "react-icons/io5";
 import { useRouter } from "next/router";
+import { BigNumber } from "@ethersproject/bignumber";
+import useListTokens from "@/hooks/useListTokens";
 
 const AddLiquidity: NextPage = () => {
   const { account, library } = useActiveWeb3React();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const router = useRouter();
+  const listTokens = useListTokens();
 
   const [tokens, setTokens] = useState<{ [key in Field]: Token | undefined }>({
     [Field.INPUT]: WETH,
@@ -65,13 +68,55 @@ const AddLiquidity: NextPage = () => {
   const [poolInfo, setPoolInfo] = useState<PoolState>(EmptyPool);
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [typePrice, setTypePrice] = useState<Field>(Field.INPUT);
-
-  // console.count("render");
-  // useEffect(() => {
-  //   chainId && setToken0(WETH[chainId]);
-  // }, [chainId]);
-
   const [tokensNeedApproved, setTokensNeedApproved] = useState<Token[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      const { input, output } = router.query;
+      let _input = tokens[Field.INPUT],
+        _output = tokens[Field.OUTPUT];
+      if (
+        input &&
+        input.toString().toLowerCase() !== WETH.address.toLowerCase()
+      ) {
+        const exits = listTokens.find(
+          (t) => t.address.toLowerCase() === input.toString().toLowerCase()
+        );
+        if (exits) {
+          _input = exits;
+        } else {
+          try {
+            let _t = await getToken(input.toString().toLowerCase(), library);
+            if (_t) _input = _t;
+          } catch (error) {}
+        }
+      }
+
+      if (
+        output &&
+        output.toString().toLowerCase() !== WETH.address.toLowerCase()
+      ) {
+        const exits = listTokens.find(
+          (t) => t.address.toLowerCase() === output.toString().toLowerCase()
+        );
+        if (exits) {
+          _output = exits;
+        } else {
+          try {
+            let _t = await getToken(output.toString().toLowerCase(), library);
+            if (_t) _output = _t;
+          } catch (error) {}
+        }
+      } else {
+        _output = WETH;
+      }
+      if (_input && _output && _input.equals(_output)) _output = undefined;
+      setTokens({
+        [Field.INPUT]: _input,
+        [Field.OUTPUT]: _output,
+      });
+    })();
+  }, [library, router, listTokens]);
 
   useEffect(() => {
     (async () => {
@@ -209,9 +254,28 @@ const AddLiquidity: NextPage = () => {
     if (
       [tokens, tokenAmounts, parsedTokenAmounts].some(
         (e) => !e[Field.INPUT] || !e[Field.OUTPUT]
-      )
+      ) ||
+      !balances?.[0] ||
+      !balances?.[1] ||
+      !parsedTokenAmounts[Field.INPUT] ||
+      !parsedTokenAmounts[Field.OUTPUT]
     )
       return true;
+
+    if (
+      BigNumber.from(parsedTokenAmounts[Field.INPUT]?.raw.toString()).gt(
+        BigNumber.from(balances[0].raw.toString())
+      )
+    ) {
+      return true;
+    }
+    if (
+      BigNumber.from(parsedTokenAmounts[Field.OUTPUT]?.raw.toString()).gt(
+        BigNumber.from(balances[1].raw.toString())
+      )
+    ) {
+      return true;
+    }
     return false;
   }, [tokens, tokenAmounts, parsedTokenAmounts]);
 
@@ -258,6 +322,33 @@ const AddLiquidity: NextPage = () => {
     }
   };
 
+  const buttonText = useMemo((): string => {
+    if (!account) return "Connect wallet";
+    if (
+      !parsedTokenAmounts[Field.INPUT] ||
+      !parsedTokenAmounts[Field.OUTPUT] ||
+      !balances?.[0] ||
+      !balances?.[1]
+    )
+      return "Add liquidity";
+    if (
+      BigNumber.from(parsedTokenAmounts[Field.INPUT]?.raw.toString()).gt(
+        BigNumber.from(balances[0].raw.toString())
+      )
+    ) {
+      return `Insufficient ${tokens[Field.INPUT]?.symbol} balance`;
+    }
+    if (
+      BigNumber.from(parsedTokenAmounts[Field.OUTPUT]?.raw.toString()).gt(
+        BigNumber.from(balances[1].raw.toString())
+      )
+    ) {
+      return `Insufficient ${tokens[Field.OUTPUT]?.symbol} balance`;
+    }
+    if (isNeedApproved) return "Approve tokens";
+    return "Add liquidity";
+  }, [isNeedApproved, parsedTokenAmounts, balances, account]);
+
   return (
     <Box>
       <ListTokensModal
@@ -302,7 +393,9 @@ const AddLiquidity: NextPage = () => {
           </Box>
           <Box p="4" border="2px solid #00ADEE" borderRadius="3xl">
             <HStack justify="flex-end">
-              <Box>Balance: {balances?.[0]?.toSignificant(6)}</Box>
+              {balances?.[0] && (
+                <Box>Balance: {balances?.[0]?.toSignificant(6)}</Box>
+              )}
             </HStack>
             <HStack>
               <HStack
@@ -325,21 +418,50 @@ const AddLiquidity: NextPage = () => {
                   <Icon w="4" h="4" as={IoIosArrowDown} />
                 </VStack>
               </HStack>
-              <Input
-                type="number"
-                border="none"
-                _hover={{
-                  border: "none",
-                }}
-                _focus={{
-                  border: "none",
-                }}
-                textAlign="right"
-                value={tokenAmounts[Field.INPUT]}
-                onChange={(e) =>
-                  handleChangeAmounts(e.target.value, Field.INPUT)
-                }
-              />
+              <Box pos="relative">
+                <Input
+                  type="number"
+                  border="none"
+                  pr="12"
+                  _hover={{
+                    border: "none",
+                  }}
+                  _focus={{
+                    border: "none",
+                  }}
+                  textAlign="right"
+                  value={tokenAmounts[Field.INPUT]}
+                  onChange={(e) =>
+                    handleChangeAmounts(e.target.value, Field.INPUT)
+                  }
+                />
+                {tokens[Field.INPUT] && (
+                  <Button
+                    pos="absolute"
+                    right="0"
+                    top="0"
+                    transform="translateY(25%);"
+                    size="xs"
+                    onClick={() => {
+                      tokens[Field.INPUT] &&
+                        balances?.[0] &&
+                        handleChangeAmounts(
+                          formatUnits(
+                            balances[0].raw.toString(),
+                            tokens[Field.INPUT]?.decimals
+                          ),
+                          Field.INPUT
+                        );
+                    }}
+                    bgImage="linear-gradient(90deg,#00ADEE,#24CBFF)"
+                    _hover={{}}
+                    _focus={{}}
+                    borderRadius="3xl"
+                  >
+                    max
+                  </Button>
+                )}
+              </Box>
             </HStack>
           </Box>
           <HStack justify="space-between">
@@ -382,7 +504,9 @@ const AddLiquidity: NextPage = () => {
           </HStack>
           <Box p="4" border="2px solid #00ADEE" borderRadius="3xl">
             <HStack justify="flex-end">
-              <Box>Balance: {balances?.[1]?.toSignificant(6)}</Box>
+              {balances?.[1] && (
+                <Box>Balance: {balances?.[1]?.toSignificant(6)}</Box>
+              )}
             </HStack>
             <HStack>
               <HStack
@@ -405,21 +529,50 @@ const AddLiquidity: NextPage = () => {
                   <Icon w="4" h="4" as={IoIosArrowDown} />
                 </VStack>
               </HStack>
-              <Input
-                type="number"
-                border="none"
-                _hover={{
-                  border: "none",
-                }}
-                _focus={{
-                  border: "none",
-                }}
-                textAlign="right"
-                value={tokenAmounts[Field.OUTPUT]}
-                onChange={(e) =>
-                  handleChangeAmounts(e.target.value, Field.OUTPUT)
-                }
-              />
+              <Box pos="relative">
+                <Input
+                  type="number"
+                  border="none"
+                  pr="12"
+                  _hover={{
+                    border: "none",
+                  }}
+                  _focus={{
+                    border: "none",
+                  }}
+                  textAlign="right"
+                  value={tokenAmounts[Field.OUTPUT]}
+                  onChange={(e) =>
+                    handleChangeAmounts(e.target.value, Field.OUTPUT)
+                  }
+                />
+                {tokens[Field.OUTPUT] && (
+                  <Button
+                    pos="absolute"
+                    right="0"
+                    top="0"
+                    transform="translateY(25%);"
+                    size="xs"
+                    onClick={() => {
+                      tokens[Field.OUTPUT] &&
+                        balances?.[1] &&
+                        handleChangeAmounts(
+                          formatUnits(
+                            balances[1].raw.toString(),
+                            tokens[Field.OUTPUT]?.decimals
+                          ),
+                          Field.OUTPUT
+                        );
+                    }}
+                    bgImage="linear-gradient(90deg,#00ADEE,#24CBFF)"
+                    _hover={{}}
+                    _focus={{}}
+                    borderRadius="3xl"
+                  >
+                    max
+                  </Button>
+                )}
+              </Box>
             </HStack>
           </Box>
 
@@ -493,7 +646,7 @@ const AddLiquidity: NextPage = () => {
               _focus={{}}
               borderRadius="3xl"
             >
-              {isNeedApproved ? "Approve tokens" : "Add liquidity"}
+              {buttonText}
             </Button>
           </Box>
         </VStack>

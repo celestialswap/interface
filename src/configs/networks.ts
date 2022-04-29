@@ -9,7 +9,7 @@ export interface Network {
 export const NETWORKS_SUPPORTED: Network = {
   name: "Binance Smart Chain Testnet",
   chainId: 97,
-  rpc: ["https://data-seed-prebsc-1-s1.binance.org:8545/"],
+  rpc: ["https://data-seed-prebsc-1-s2.binance.org:8545/"],
 };
 
 export const WETH: Token = new Token(
@@ -79,6 +79,7 @@ export const BETTER_TRADE_LESS_HOPS_THRESHOLD = new Percent(
 
 export const ZERO_PERCENT = new Percent("0");
 export const ONE_HUNDRED_PERCENT = new Percent("1");
+export const FIVE_PERCENT = new Percent(JSBI.BigInt(5), JSBI.BigInt(100));
 export const SWAP_FEE_PERCENT = new Percent(JSBI.BigInt(97), JSBI.BigInt(100));
 
 export const BIPS_BASE = JSBI.BigInt(10000);

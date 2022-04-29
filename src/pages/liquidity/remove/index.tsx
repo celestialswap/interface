@@ -1,6 +1,8 @@
 import ListTokensModal from "@/components/ListTokensModal";
 import { Field, WETH } from "@/configs/networks";
 import { useActiveWeb3React } from "@/hooks/useActiveWeb3React";
+import useListTokens from "@/hooks/useListTokens";
+import { getToken } from "@/state/erc20";
 import {
   EmptyPool,
   getPoolInfo,
@@ -34,6 +36,7 @@ const RemoveLiquidity: NextPage = () => {
   const { account, library } = useActiveWeb3React();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const router = useRouter();
+  const listTokens = useListTokens();
 
   const [tokens, setTokens] = useState<{ [key in Field]: Token | undefined }>({
     [Field.INPUT]: WETH,
@@ -48,6 +51,54 @@ const RemoveLiquidity: NextPage = () => {
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [removePercent, setRemovePercent] = useState<number>(0);
   const [showTooltip, setShowTooltip] = useState<boolean>(false);
+
+  useEffect(() => {
+    (async () => {
+      const { input, output } = router.query;
+      let _input = tokens[Field.INPUT],
+        _output = tokens[Field.OUTPUT];
+      if (
+        input &&
+        input.toString().toLowerCase() !== WETH.address.toLowerCase()
+      ) {
+        const exits = listTokens.find(
+          (t) => t.address.toLowerCase() === input.toString().toLowerCase()
+        );
+        if (exits) {
+          _input = exits;
+        } else {
+          try {
+            let _t = await getToken(input.toString().toLowerCase(), library);
+            if (_t) _input = _t;
+          } catch (error) {}
+        }
+      }
+
+      if (
+        output &&
+        output.toString().toLowerCase() !== WETH.address.toLowerCase()
+      ) {
+        const exits = listTokens.find(
+          (t) => t.address.toLowerCase() === output.toString().toLowerCase()
+        );
+        if (exits) {
+          _output = exits;
+        } else {
+          try {
+            let _t = await getToken(output.toString().toLowerCase(), library);
+            if (_t) _output = _t;
+          } catch (error) {}
+        }
+      } else {
+        _output = WETH;
+      }
+      if (_input && _output && _input.equals(_output)) _output = undefined;
+      setTokens({
+        [Field.INPUT]: _input,
+        [Field.OUTPUT]: _output,
+      });
+    })();
+  }, [library, router, listTokens]);
 
   useEffect(() => {
     (async () => {

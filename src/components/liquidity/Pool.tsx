@@ -74,18 +74,6 @@ const Pool = ({ pool }: PoolProps) => {
           />
         </VStack>
       </HStack>
-      {/* <Box>pair: {pool.pair?.liquidityToken.address}</Box>
-      <Box>
-        token0: {pool.pair?.token0?.symbol} - {pool.pair?.token0?.name} -{" "}
-        {pool.pair?.token0?.decimals}
-      </Box>
-      <Box>
-        token1: {pool.pair?.token1?.symbol} - {pool.pair?.token1?.symbol} -{" "}
-        {pool.pair?.token1?.decimals}
-      </Box>
-      <Box>token0/token1: {pool.prices?.[Field.INPUT]?.toSignificant(6)}</Box>
-      <Box>token1/token0: {pool.prices?.[Field.OUTPUT]?.toSignificant(6)}</Box>
-      <Box>share of pool: {pool.shareOfPool?.toSignificant(6)}%</Box> */}
       {isExpand && (
         <>
           <HStack justify="space-between">
@@ -110,17 +98,38 @@ const Pool = ({ pool }: PoolProps) => {
           </HStack>
 
           <HStack pt="2" color="white">
-            {/* <Link href="/liquidity/add" passHref>
-              <HStack bg="#00ADEE" p="3" borderRadius="3xl" cursor="pointer">
+            <Link
+              href={
+                pool.pair?.token0 && pool.pair?.token1
+                  ? `/swap?input=${pool.pair.token0.address}&output=${pool.pair.token1.address}`
+                  : "/swap"
+              }
+              passHref
+            >
+              <HStack bg="#3cbda3" p="3" borderRadius="3xl" cursor="pointer">
                 <Icon as={AiOutlineSwap} w="4" h="4" />
               </HStack>
-            </Link> */}
-            <Link href="/liquidity/add" passHref>
+            </Link>
+            <Link
+              href={
+                pool.pair?.token0 && pool.pair?.token1
+                  ? `/liquidity/add?input=${pool.pair.token0.address}&output=${pool.pair.token1.address}`
+                  : "/liquidity/add"
+              }
+              passHref
+            >
               <HStack bg="#00ADEE" p="3" borderRadius="3xl" cursor="pointer">
                 <Icon as={IoAdd} w="4" h="4" />
               </HStack>
             </Link>
-            <Link href="/liquidity/remove" passHref>
+            <Link
+              href={
+                pool.pair?.token0 && pool.pair?.token1
+                  ? `/liquidity/remove?input=${pool.pair.token0.address}&output=${pool.pair.token1.address}`
+                  : "/liquidity/remove"
+              }
+              passHref
+            >
               <HStack bg="#c53f45e6" p="3" borderRadius="3xl" cursor="pointer">
                 <Icon as={BiMinus} w="4" h="4" />
               </HStack>

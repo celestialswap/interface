@@ -3,13 +3,14 @@ import { APP_ROUTE } from "@/configs/index";
 import {
   BIPS_BASE,
   Field,
+  FIVE_PERCENT,
   ROUTER_ADDRESS,
-  SWAP_FEE_PERCENT,
   WETH,
 } from "@/configs/networks";
 import { useActiveWeb3React } from "@/hooks/useActiveWeb3React";
 import useCurrentRoute from "@/hooks/useCurrentRoute";
-import { approves, getAllowances } from "@/state/erc20";
+import useListTokens from "@/hooks/useListTokens";
+import { approves, getAllowances, getToken } from "@/state/erc20";
 import {
   EmptyPool,
   getCurrencyBalances,
@@ -40,7 +41,12 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { BigNumber } from "@ethersproject/bignumber";
-import { formatEther, parseEther, parseUnits } from "@ethersproject/units";
+import {
+  formatEther,
+  formatUnits,
+  parseEther,
+  parseUnits,
+} from "@ethersproject/units";
 import {
   CurrencyAmount,
   Fraction,
@@ -52,6 +58,7 @@ import {
 } from "@uniswap/sdk";
 import type { NextPage } from "next";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AiOutlineWarning } from "react-icons/ai";
 import { IoIosArrowDown } from "react-icons/io";
@@ -66,6 +73,8 @@ const Swap: NextPage = () => {
     onClose: onCloseConfirmHighSlippage,
   } = useDisclosure();
   const currentRoute = useCurrentRoute();
+  const { query } = useRouter();
+  const listTokens = useListTokens();
 
   const [tokens, setTokens] = useState<{ [key in Field]: Token | undefined }>({
     [Field.INPUT]: WETH,
@@ -85,6 +94,56 @@ const Swap: NextPage = () => {
   const [slippage, setSlippage] = useState<string>("0.5");
   const [disabledMultihops, setDisabledMultihops] = useState<boolean>(true);
   const [loadedPool, setLoadedPool] = useState<boolean>(false);
+  const [isCheckedHighPriceImpact, setIsCheckedHighPriceImpact] =
+    useState<boolean>(false);
+
+  useEffect(() => {
+    (async () => {
+      const { input, output } = query;
+      let _input = tokens[Field.INPUT],
+        _output = tokens[Field.OUTPUT];
+      if (
+        input &&
+        input.toString().toLowerCase() !== WETH.address.toLowerCase()
+      ) {
+        const exits = listTokens.find(
+          (t) => t.address.toLowerCase() === input.toString().toLowerCase()
+        );
+        if (exits) {
+          _input = exits;
+        } else {
+          try {
+            let _t = await getToken(input.toString().toLowerCase(), library);
+            if (_t) _input = _t;
+          } catch (error) {}
+        }
+      }
+
+      if (
+        output &&
+        output.toString().toLowerCase() !== WETH.address.toLowerCase()
+      ) {
+        const exits = listTokens.find(
+          (t) => t.address.toLowerCase() === output.toString().toLowerCase()
+        );
+        if (exits) {
+          _output = exits;
+        } else {
+          try {
+            let _t = await getToken(output.toString().toLowerCase(), library);
+            if (_t) _output = _t;
+          } catch (error) {}
+        }
+      } else {
+        _output = WETH;
+      }
+      if (_input && _output && _input.equals(_output)) _output = undefined;
+      setTokens({
+        [Field.INPUT]: _input,
+        [Field.OUTPUT]: _output,
+      });
+    })();
+  }, [library, query, listTokens]);
 
   useEffect(() => {
     (async () => {
@@ -186,14 +245,28 @@ const Swap: NextPage = () => {
   };
 
   const handleChangeAmounts = (value: string, independentField: Field) => {
+    if (+value <= 0) return setTypedValue("");
     setTypedValue(value);
     setIndependentField(independentField);
   };
 
   const isDisableBtn: boolean = useMemo(() => {
-    if (!trade) return true;
+    if (!trade || !balances?.[0] || !tokens[Field.INPUT] || !typedValue)
+      return true;
+    let input =
+      independentField === Field.INPUT
+        ? parseUnits(typedValue, tokens[Field.INPUT]?.decimals).toString()
+        : trade.inputAmount.raw.toString();
+
+    if (
+      BigNumber.from(input).gt(
+        BigNumber.from(balances[0]?.raw.toString() ?? "0")
+      )
+    ) {
+      return true;
+    }
     return false;
-  }, [trade]);
+  }, [trade, balances]);
 
   const isNeedApproved: boolean = useMemo(
     () => (tokensNeedApproved.length > 0 ? true : false),
@@ -230,10 +303,13 @@ const Swap: NextPage = () => {
     }
   }, [account, library, tokensNeedApproved]);
 
-  const isHighSlippage = useMemo(() => +slippage >= 5, [slippage]);
+  const isHighPriceImpact = useMemo(
+    () => (trade ? trade.priceImpact.greaterThan(FIVE_PERCENT) : false),
+    [trade]
+  );
 
   const onSubmit = () => {
-    if (isHighSlippage) return onOpenConfirmHighSlippage();
+    if (isHighPriceImpact) return onOpenConfirmHighSlippage();
     if (isNeedApproved) {
       return onApproveTokens();
     } else if (!isDisableBtn) {
@@ -249,8 +325,39 @@ const Swap: NextPage = () => {
     }
   };
 
-  const [isCheckedHighSlippage, setIsCheckedHighSlippage] =
-    useState<boolean>(false);
+  const buttonText = useMemo((): string => {
+    if (!account) return "Connect wallet";
+    if (
+      !loadedPool ||
+      !tokens[Field.INPUT] ||
+      !tokens[Field.OUTPUT] ||
+      !balances ||
+      !balances[0] ||
+      !balances[1]
+    )
+      return "Swap";
+
+    if (!trade) {
+      if (poolInfo.pair) return "Swap";
+      else return "No route";
+    } else {
+      let input =
+        independentField === Field.INPUT
+          ? parseUnits(typedValue, tokens[Field.INPUT]?.decimals).toString()
+          : trade.inputAmount.raw.toString();
+
+      if (
+        BigNumber.from(input).gt(
+          BigNumber.from(balances[0]?.raw.toString() ?? "0")
+        )
+      ) {
+        return `Insufficient ${tokens[Field.INPUT]?.symbol} balance`;
+      }
+      if (poolInfo.noLiquidity && poolInfo.pair) return "No liquidity";
+      else if (isNeedApproved) return "Approve token";
+    }
+    return "Swap";
+  }, [loadedPool, tokens, trade, poolInfo, isNeedApproved, account]);
 
   return (
     <Box>
@@ -286,8 +393,8 @@ const Swap: NextPage = () => {
                 </Box>
               )}
               <Checkbox
-                checked={isCheckedHighSlippage}
-                onChange={(v) => setIsCheckedHighSlippage(v.target.checked)}
+                checked={isCheckedHighPriceImpact}
+                onChange={(v) => setIsCheckedHighPriceImpact(v.target.checked)}
               >
                 I understand this will result in a loss of funds
               </Checkbox>
@@ -302,20 +409,10 @@ const Swap: NextPage = () => {
                   isDisabled={isDisableBtn}
                   isLoading={submitting}
                   onClick={() =>
-                    isCheckedHighSlippage ? onSubmitHighSlippage() : null
+                    isCheckedHighPriceImpact ? onSubmitHighSlippage() : null
                   }
                 >
-                  {loadedPool && tokens[Field.INPUT] && tokens[Field.OUTPUT]
-                    ? !trade
-                      ? poolInfo.pair
-                        ? "Swap"
-                        : "No route"
-                      : poolInfo.noLiquidity && poolInfo.pair
-                      ? "No liquidity"
-                      : isNeedApproved
-                      ? "Approve token"
-                      : "Swap"
-                    : "Swap"}
+                  {buttonText}
                 </Button>
                 <Button
                   w="24"
@@ -463,25 +560,54 @@ const Swap: NextPage = () => {
                   <Icon w="4" h="4" as={IoIosArrowDown} />
                 </VStack>
               </HStack>
-              <Input
-                type="number"
-                border="none"
-                _hover={{
-                  border: "none",
-                }}
-                _focus={{
-                  border: "none",
-                }}
-                textAlign="right"
-                value={
-                  independentField === Field.INPUT
-                    ? typedValue
-                    : trade?.inputAmount.toSignificant(6) ?? ""
-                }
-                onChange={(e) =>
-                  handleChangeAmounts(e.target.value, Field.INPUT)
-                }
-              />
+              <Box pos="relative">
+                <Input
+                  type="number"
+                  border="none"
+                  pr="12"
+                  _hover={{
+                    border: "none",
+                  }}
+                  _focus={{
+                    border: "none",
+                  }}
+                  textAlign="right"
+                  value={
+                    independentField === Field.INPUT
+                      ? typedValue
+                      : trade?.inputAmount.toSignificant(6) ?? ""
+                  }
+                  onChange={(e) =>
+                    handleChangeAmounts(e.target.value, Field.INPUT)
+                  }
+                />
+                {tokens[Field.INPUT] && (
+                  <Button
+                    pos="absolute"
+                    right="0"
+                    top="0"
+                    transform="translateY(25%);"
+                    size="xs"
+                    onClick={() => {
+                      tokens[Field.INPUT] &&
+                        balances?.[0] &&
+                        handleChangeAmounts(
+                          formatUnits(
+                            balances[0].raw.toString(),
+                            tokens[Field.INPUT]?.decimals
+                          ),
+                          Field.INPUT
+                        );
+                    }}
+                    bgImage="linear-gradient(90deg,#00ADEE,#24CBFF)"
+                    _hover={{}}
+                    _focus={{}}
+                    borderRadius="3xl"
+                  >
+                    max
+                  </Button>
+                )}
+              </Box>
             </HStack>
           </Box>
           <HStack justify="center">
@@ -535,25 +661,27 @@ const Swap: NextPage = () => {
                   <Icon w="4" h="4" as={IoIosArrowDown} />
                 </VStack>
               </HStack>
-              <Input
-                type="number"
-                border="none"
-                _hover={{
-                  border: "none",
-                }}
-                _focus={{
-                  border: "none",
-                }}
-                textAlign="right"
-                value={
-                  independentField === Field.OUTPUT
-                    ? typedValue
-                    : trade?.outputAmount.toSignificant(6) ?? ""
-                }
-                onChange={(e) =>
-                  handleChangeAmounts(e.target.value, Field.OUTPUT)
-                }
-              />
+              <Box pos="relative">
+                <Input
+                  type="number"
+                  border="none"
+                  _hover={{
+                    border: "none",
+                  }}
+                  _focus={{
+                    border: "none",
+                  }}
+                  textAlign="right"
+                  value={
+                    independentField === Field.OUTPUT
+                      ? typedValue
+                      : trade?.outputAmount.toSignificant(6) ?? ""
+                  }
+                  onChange={(e) =>
+                    handleChangeAmounts(e.target.value, Field.OUTPUT)
+                  }
+                />
+              </Box>
             </HStack>
           </Box>
 
@@ -572,14 +700,17 @@ const Swap: NextPage = () => {
           )}
 
           <Box>
-            {tokens[Field.INPUT] && tokens[Field.OUTPUT] && isHighSlippage && (
-              <HStack color="#c53f45e6">
-                <Icon as={AiOutlineWarning} w="6" h="6" />
-                <Box fontWeight="bold" fontSize="sm">
-                  Price Impact is very high please double check the trade!
-                </Box>
-              </HStack>
-            )}
+            {tokens[Field.INPUT] &&
+              tokens[Field.OUTPUT] &&
+              trade &&
+              trade.priceImpact.greaterThan(FIVE_PERCENT) && (
+                <HStack color="#c53f45e6">
+                  <Icon as={AiOutlineWarning} w="6" h="6" />
+                  <Box fontWeight="bold" fontSize="sm">
+                    Price Impact is very high please double check the trade!
+                  </Box>
+                </HStack>
+              )}
             <Button
               mt="2"
               w="100%"
@@ -591,17 +722,7 @@ const Swap: NextPage = () => {
               _focus={{}}
               borderRadius="3xl"
             >
-              {loadedPool && tokens[Field.INPUT] && tokens[Field.OUTPUT]
-                ? !trade
-                  ? poolInfo.pair
-                    ? "Swap"
-                    : "No route"
-                  : poolInfo.noLiquidity && poolInfo.pair
-                  ? "No liquidity"
-                  : isNeedApproved
-                  ? "Approve token"
-                  : "Swap"
-                : "Swap"}
+              {buttonText}
             </Button>
           </Box>
           {trade && (
@@ -609,7 +730,7 @@ const Swap: NextPage = () => {
               <HStack justify="space-between">
                 <Box>Price Impact</Box>
                 <Box fontWeight="bold">
-                  {parseFloat(trade.priceImpact.toSignificant(6)).toFixed(2)}%
+                  {trade.priceImpact.toSignificant(6)}%
                 </Box>
               </HStack>
               <HStack justify="space-between">
