@@ -153,7 +153,7 @@ export const swapCallback = async (
   allowedSlippage: number
 ) => {
   try {
-    if (!library || !account || !trade) return;
+    if (!library || !account || !trade || isNaN(allowedSlippage)) return;
 
     const routerContract = getRouterContract(library, account);
     const deadline = Math.floor(Date.now() / 1000) + 30 * 60;

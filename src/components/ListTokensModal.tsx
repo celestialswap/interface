@@ -1,4 +1,7 @@
+import { useActiveWeb3React } from "@/hooks/useActiveWeb3React";
 import useListTokens from "@/hooks/useListTokens";
+import useToken from "@/hooks/useToken";
+import { getToken } from "@/state/erc20";
 import {
   Box,
   HStack,
@@ -9,9 +12,11 @@ import {
   ModalContent,
   ModalHeader,
   ModalOverlay,
+  Spinner,
 } from "@chakra-ui/react";
 import { Token } from "@uniswap/sdk";
-import React from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { isAddress } from "../utils";
 
 interface ListTokensModalProps {
   isOpen: boolean;
@@ -25,6 +30,37 @@ const ListTokensModal = ({
   callback,
 }: ListTokensModalProps) => {
   const listTokens = useListTokens();
+  const { library } = useActiveWeb3React();
+
+  const [searchToken, setSearchToken] = useState<string>("");
+  const [tokens, setTokens] = useState<Token[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const handleSearchToken = useCallback(async (): Promise<Token[]> => {
+    if (!searchToken || !isAddress(searchToken)) return listTokens;
+    const existsTokens = listTokens.filter(
+      (t) => t.address.toLowerCase() === searchToken.toLowerCase()
+    );
+    if (existsTokens.length) return existsTokens;
+    const _t = await getToken(searchToken, library);
+    if (_t instanceof Token) return [_t];
+    return [];
+  }, [listTokens, searchToken, library]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        setLoading(true);
+        const _tokens = await handleSearchToken();
+        setTokens(_tokens);
+        setLoading(false);
+      } catch (error) {
+        setLoading(false);
+        console.error(error);
+      }
+    })();
+  }, [handleSearchToken]);
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="sm">
       <ModalOverlay />
@@ -39,28 +75,47 @@ const ListTokensModal = ({
         <ModalBody>
           <Input
             placeholder="enter token address"
-            outline="1px solid #00ADEE"
+            outline={
+              searchToken
+                ? !isAddress(searchToken)
+                  ? "none"
+                  : "1px solid #00ADEE"
+                : "1px solid #00ADEE"
+            }
             border="none"
             borderRadius="3xl"
             _focus={{}}
             _hover={{}}
+            value={searchToken}
+            onChange={(e) => setSearchToken(e.target.value)}
+            isInvalid={searchToken ? !isAddress(searchToken) : false}
+            errorBorderColor="#c53f45e6"
           />
           <Box mt="2">
-            {listTokens.map((token, idx) => (
-              <HStack
-                key={idx}
-                fontSize="sm"
-                borderRadius="3xl"
-                px="6"
-                py="4"
-                _hover={{ bg: "rgba(0, 173, 238, 0.2)", cursor: "pointer" }}
-                onClick={() => callback(token)}
-              >
-                <Box>{token.symbol}</Box>
-                <Box>-</Box>
-                <Box>{token.name}</Box>
-              </HStack>
-            ))}
+            {loading ? (
+              <Box textAlign="center">
+                <Spinner />
+              </Box>
+            ) : (
+              tokens.map((token, idx) => (
+                <HStack
+                  key={idx}
+                  fontSize="sm"
+                  borderRadius="3xl"
+                  px="6"
+                  py="4"
+                  _hover={{ bg: "rgba(0, 173, 238, 0.2)", cursor: "pointer" }}
+                  onClick={() => {
+                    setSearchToken("");
+                    callback(token);
+                  }}
+                >
+                  <Box>{token.symbol}</Box>
+                  <Box>-</Box>
+                  <Box>{token.name}</Box>
+                </HStack>
+              ))
+            )}
           </Box>
         </ModalBody>
       </ModalContent>

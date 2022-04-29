@@ -80,9 +80,9 @@ const Web3Layout = ({ children }: { children: any }) => {
   const triedEager: boolean = useEagerConnect();
   useInactiveListener(!triedEager || !!activatingConnector);
 
-  useEffect(() => {
-    connect(injected);
-  }, [connect]);
+  // useEffect(() => {
+  //   connect(injected);
+  // }, [connect]);
 
   return (
     <Box

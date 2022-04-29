@@ -20,6 +20,7 @@ import { getDerivedSwapInfo, swapCallback } from "@/state/swap";
 import {
   Box,
   Button,
+  Checkbox,
   Grid,
   HStack,
   Icon,
@@ -27,6 +28,13 @@ import {
   Input,
   InputGroup,
   InputRightAddon,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
   Switch,
   useDisclosure,
   VStack,
@@ -45,12 +53,18 @@ import {
 import type { NextPage } from "next";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { AiOutlineWarning } from "react-icons/ai";
 import { IoIosArrowDown } from "react-icons/io";
 import { MdSwapVert } from "react-icons/md";
 
 const Swap: NextPage = () => {
   const { account, library } = useActiveWeb3React();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    isOpen: isOpenConfirmHighSlippage,
+    onOpen: onOpenConfirmHighSlippage,
+    onClose: onCloseConfirmHighSlippage,
+  } = useDisclosure();
   const currentRoute = useCurrentRoute();
 
   const [tokens, setTokens] = useState<{ [key in Field]: Token | undefined }>({
@@ -68,8 +82,8 @@ const Swap: NextPage = () => {
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [tokensNeedApproved, setTokensNeedApproved] = useState<Token[]>([]);
   const [trade, setTrade] = useState<Trade | null>(null);
-  const [slippage, setSlippage] = useState<number>(0.5);
-  const [disabledMultihops, setDisabledMultihops] = useState<boolean>(false);
+  const [slippage, setSlippage] = useState<string>("0.5");
+  const [disabledMultihops, setDisabledMultihops] = useState<boolean>(true);
   const [loadedPool, setLoadedPool] = useState<boolean>(false);
 
   useEffect(() => {
@@ -189,7 +203,7 @@ const Swap: NextPage = () => {
   const onSwapCallback = useCallback(async () => {
     try {
       setSubmitting(true);
-      await swapCallback(library, account, trade, slippage);
+      await swapCallback(library, account, trade, +slippage);
       setReloadPool((pre) => !pre);
       setSubmitting(false);
     } catch (error) {
@@ -216,13 +230,27 @@ const Swap: NextPage = () => {
     }
   }, [account, library, tokensNeedApproved]);
 
+  const isHighSlippage = useMemo(() => +slippage >= 5, [slippage]);
+
   const onSubmit = () => {
+    if (isHighSlippage) return onOpenConfirmHighSlippage();
     if (isNeedApproved) {
-      onApproveTokens();
+      return onApproveTokens();
     } else if (!isDisableBtn) {
-      onSwapCallback();
+      return onSwapCallback();
     }
   };
+
+  const onSubmitHighSlippage = () => {
+    if (isNeedApproved) {
+      return onApproveTokens();
+    } else if (!isDisableBtn) {
+      return onSwapCallback().then(onCloseConfirmHighSlippage);
+    }
+  };
+
+  const [isCheckedHighSlippage, setIsCheckedHighSlippage] =
+    useState<boolean>(false);
 
   return (
     <Box>
@@ -231,6 +259,80 @@ const Swap: NextPage = () => {
         onClose={onClose}
         callback={handleSelectToken}
       />
+
+      <Modal
+        isOpen={isOpenConfirmHighSlippage}
+        onClose={onCloseConfirmHighSlippage}
+      >
+        <ModalOverlay />
+        <ModalContent
+          border="2px solid #00ADEE"
+          borderRadius="3xl"
+          bg="#0a2d74e6"
+          color="white"
+        >
+          <ModalHeader textAlign="center">Price Impact Warning</ModalHeader>
+          <ModalCloseButton borderRadius="3xl" _focus={{}} />
+          <ModalBody>
+            <VStack spacing="6" pb="4">
+              {trade && (
+                <Box color="#c53f45e6" fontWeight="medium">
+                  This trade has an extremely high price impact, meaning you
+                  will lose{" "}
+                  <span style={{ fontWeight: 800, fontSize: "20px" }}>
+                    {parseFloat(trade.priceImpact.toSignificant(6)).toFixed(2)}%
+                  </span>{" "}
+                  of your tokens
+                </Box>
+              )}
+              <Checkbox
+                checked={isCheckedHighSlippage}
+                onChange={(v) => setIsCheckedHighSlippage(v.target.checked)}
+              >
+                I understand this will result in a loss of funds
+              </Checkbox>
+
+              <HStack justify="space-between">
+                <Button
+                  w="24"
+                  bgImage="linear-gradient(90deg,#00ADEE,#24CBFF)"
+                  _hover={{}}
+                  _focus={{}}
+                  borderRadius="3xl"
+                  isDisabled={isDisableBtn}
+                  isLoading={submitting}
+                  onClick={() =>
+                    isCheckedHighSlippage ? onSubmitHighSlippage() : null
+                  }
+                >
+                  {loadedPool && tokens[Field.INPUT] && tokens[Field.OUTPUT]
+                    ? !trade
+                      ? poolInfo.pair
+                        ? "Swap"
+                        : "No route"
+                      : poolInfo.noLiquidity && poolInfo.pair
+                      ? "No liquidity"
+                      : isNeedApproved
+                      ? "Approve token"
+                      : "Swap"
+                    : "Swap"}
+                </Button>
+                <Button
+                  w="24"
+                  _hover={{}}
+                  _focus={{}}
+                  borderRadius="3xl"
+                  bg="transparent"
+                  border="2px solid #00ADEE"
+                  onClick={onCloseConfirmHighSlippage}
+                >
+                  Cancel
+                </Button>
+              </HStack>
+            </VStack>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
 
       <VStack justify="center">
         <Grid
@@ -307,9 +409,11 @@ const Swap: NextPage = () => {
                   borderRadius="3xl"
                   bg="transparent"
                   onChange={(e) => {
-                    const value = +e.target.value;
-                    if (value === 0 || value >= 100) return;
-                    setSlippage(+e.target.value);
+                    if (isNaN(+e.target.value)) return;
+                    setSlippage(e.target.value);
+                  }}
+                  onBlur={() => {
+                    if (+slippage === 0 || +slippage >= 100) setSlippage("0.5");
                   }}
                 />
                 <InputRightAddon
@@ -468,7 +572,16 @@ const Swap: NextPage = () => {
           )}
 
           <Box>
+            {tokens[Field.INPUT] && tokens[Field.OUTPUT] && isHighSlippage && (
+              <HStack color="#c53f45e6">
+                <Icon as={AiOutlineWarning} w="6" h="6" />
+                <Box fontWeight="bold" fontSize="sm">
+                  Price Impact is very high please double check the trade!
+                </Box>
+              </HStack>
+            )}
             <Button
+              mt="2"
               w="100%"
               isDisabled={isDisableBtn}
               isLoading={submitting}
@@ -512,12 +625,12 @@ const Swap: NextPage = () => {
                     ? independentField === Field.INPUT
                       ? trade
                           .minimumAmountOut(
-                            new Percent(JSBI.BigInt(slippage * 100), BIPS_BASE)
+                            new Percent(JSBI.BigInt(+slippage * 100), BIPS_BASE)
                           )
                           .toSignificant(6)
                       : trade
                           .maximumAmountIn(
-                            new Percent(JSBI.BigInt(slippage * 100), BIPS_BASE)
+                            new Percent(JSBI.BigInt(+slippage * 100), BIPS_BASE)
                           )
                           .toSignificant(6)
                     : ""}
