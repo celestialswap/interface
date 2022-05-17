@@ -29,6 +29,27 @@ export const TOKEN_LIST: Token[] = [
   WETH,
   new Token(
     NETWORKS_SUPPORTED.chainId,
+    "0x51Ba566222d88996658c39CBe38e17efa84b69e5",
+    18,
+    "USDC",
+    "USDC"
+  ),
+  new Token(
+    NETWORKS_SUPPORTED.chainId,
+    "0xB6d64fcA199893409EbE8b90b8d54aa3aCb02d86",
+    18,
+    "USDT",
+    "USDT"
+  ),
+  new Token(
+    NETWORKS_SUPPORTED.chainId,
+    "0x87Bc2d3a2eDBbE8Df5f6929Be15A4A87879Aa5FB",
+    18,
+    "DAI",
+    "DAI"
+  ),
+  new Token(
+    NETWORKS_SUPPORTED.chainId,
     "0x8C8147156799CCf40454DAbB31eDbb0FAa8B7394",
     18,
     "TEST1",
