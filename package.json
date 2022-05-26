@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@apollo/client": "^3.6.5",
     "@chakra-ui/react": "^1.8.6",
     "@emotion/react": "^11.8.1",
     "@emotion/styled": "^11.8.1",
@@ -23,18 +24,27 @@
     "@ethersproject/units": "^5.6.0",
     "@uniswap/sdk": "^3.0.3",
     "@uniswap/sdk-core": "^3.0.1",
+    "@uniswap/token-lists": "^1.0.0-beta.28",
     "@web3-react/core": "^6.1.9",
     "@web3-react/injected-connector": "^6.0.7",
     "@web3-react/walletconnect-connector": "^6.2.13",
+    "ajv": "^8.11.0",
+    "ajv-formats": "^2.1.1",
+    "bignumber.js": "^9.0.2",
     "dayjs": "^1.11.2",
+    "decimal.js-light": "^2.5.1",
     "framer-motion": "^6.2.8",
+    "graphql": "^16.5.0",
     "lightweight-charts": "^3.8.0",
     "lodash": "^4.17.21",
     "next": "12.1.0",
+    "numeral": "^2.0.6",
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "react-icons": "^4.3.1",
-    "react-use": "^17.3.2"
+    "react-use": "^17.3.2",
+    "rebass": "^4.0.7",
+    "toformat": "^2.0.0"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.179",

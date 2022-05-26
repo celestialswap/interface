@@ -7,8 +7,7 @@ import {
 import { BigNumber } from "@ethersproject/bignumber";
 import { MaxUint256 } from "@ethersproject/constants";
 import { Web3Provider } from "@ethersproject/providers";
-import { Token, TokenAmount } from "@uniswap/sdk";
-import { CurrencyAmount } from "@uniswap/sdk-core";
+import { Token, TokenAmount, CurrencyAmount } from "@uniswap/sdk";
 
 export const getToken = async (
   token: string,

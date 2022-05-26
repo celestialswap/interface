@@ -245,7 +245,7 @@ const Swap: NextPage = () => {
   };
 
   const handleChangeAmounts = (value: string, independentField: Field) => {
-    if (+value <= 0) return setTypedValue("");
+    if (isNaN(+value)) return;
     setTypedValue(value);
     setIndependentField(independentField);
   };
@@ -357,7 +357,7 @@ const Swap: NextPage = () => {
       else if (isNeedApproved) return "Approve token";
     }
     return "Swap";
-  }, [loadedPool, tokens, trade, poolInfo, isNeedApproved, account]);
+  }, [loadedPool, tokens, trade, poolInfo, isNeedApproved, account, balances]);
 
   return (
     <Box>

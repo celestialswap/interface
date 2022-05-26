@@ -17,15 +17,23 @@
     "baseUrl": "src",
     "paths": {
       "@/abis/*": ["abis/*"],
+      "@/apollo/*": ["apollo/*"],
       "@/assets/*": ["assets/*"],
       "@/components/*": ["components/*"],
       "@/configs/*": ["configs/*"],
+      "@/contexts/*": ["contexts/*"],
       "@/hooks/*": ["hooks/*"],
       "@/styles/*": ["styles/*"],
       "@/state/*": ["state/*"],
       "@/utils/*": ["utils/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "src/**/*.js",
+    "src/**/**/*.js"
+  ],
   "exclude": ["node_modules"]
 }
