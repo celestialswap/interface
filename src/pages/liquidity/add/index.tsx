@@ -290,6 +290,10 @@ const AddLiquidity: NextPage = () => {
       await addLiquidityCallback(account, library, tokens, parsedTokenAmounts);
       setReloadPool((pre) => !pre);
       setSubmitting(false);
+      setTokenAmounts({
+        [Field.INPUT]: "",
+        [Field.OUTPUT]: "",
+      });
     } catch (error) {
       console.error(error);
       setSubmitting(false);
@@ -420,7 +424,7 @@ const AddLiquidity: NextPage = () => {
                   <Icon w="4" h="4" as={IoIosArrowDown} />
                 </VStack>
               </HStack>
-              <Box pos="relative">
+              <Box pos="relative" flex="1">
                 <Input
                   type="number"
                   border="none"
@@ -533,7 +537,7 @@ const AddLiquidity: NextPage = () => {
                   <Icon w="4" h="4" as={IoIosArrowDown} />
                 </VStack>
               </HStack>
-              <Box pos="relative">
+              <Box pos="relative" flex="1">
                 <Input
                   type="number"
                   border="none"

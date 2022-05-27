@@ -8,7 +8,7 @@ import { GET_BLOCK, GET_BLOCKS, SHARE_VALUE } from "@/apollo/queries";
 import { Text } from "rebass";
 import _Decimal from "decimal.js-light";
 import toFormat from "toformat";
-import { timeframeOptions } from "@/configs/info";
+import { timeframeOptions } from "@/configs/networks";
 import Numeral from "numeral";
 
 // format libraries

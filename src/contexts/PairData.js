@@ -36,7 +36,7 @@ import {
   timeframeOptions,
   TRACKED_OVERRIDES_PAIRS,
   TRACKED_OVERRIDES_TOKENS,
-} from "@/configs/info";
+} from "@/configs/networks";
 import { useLatestBlocks } from "./Application";
 import { updateNameData } from "@/utils/info/data";
 

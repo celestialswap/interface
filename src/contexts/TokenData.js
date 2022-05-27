@@ -31,7 +31,7 @@ import {
   getBlocksFromTimestamps,
   splitQuery,
 } from "@/utils/info";
-import { timeframeOptions } from "@/configs/info";
+import { timeframeOptions } from "@/configs/networks";
 import { useLatestBlocks } from "./Application";
 import { updateNameData } from "@/utils/info/data";
 
