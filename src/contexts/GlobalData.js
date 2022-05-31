@@ -370,7 +370,10 @@ const getChartData = async (oldestDateToFetch, offsetData) => {
         // add the day index to the set of days
         dayIndexSet.add((data[i].date / oneDay).toFixed(0));
         dayIndexArray.push(data[i]);
-        dayData.dailyVolumeUSD = parseFloat(dayData.dailyVolumeUSD);
+        dayData = {
+          ...dayData,
+          dailyVolumeUSD: parseFloat(dayData.dailyVolumeUSD),
+        };
       });
 
       // fill in empty days ( there will be no day datas if no trades made that day )
@@ -411,9 +414,12 @@ const getChartData = async (oldestDateToFetch, offsetData) => {
         !checked &&
         offsetData.map((dayData) => {
           if (dayData[date]) {
-            data[i].dailyVolumeUSD =
-              parseFloat(data[i].dailyVolumeUSD) -
-              parseFloat(dayData[date].dailyVolumeUSD);
+            data[i] = {
+              ...data[i],
+              dailyVolumeUSD:
+                parseFloat(data[i].dailyVolumeUSD) -
+                parseFloat(dayData[date].dailyVolumeUSD),
+            };
           }
           return true;
         });

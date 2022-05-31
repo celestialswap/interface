@@ -34,6 +34,8 @@
     "**/*.tsx",
     "src/**/*.js",
     "src/**/**/*.js"
+    // "src/components/info/GlobalChart.jsx",
+    // "src/components/info/TradingviewChart.jsx"
   ],
   "exclude": ["node_modules"]
 }

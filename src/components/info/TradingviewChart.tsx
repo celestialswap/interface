@@ -77,152 +77,144 @@ const TradingViewChart = ({
   useEffect(() => {
     if (!chartCreated && formattedData) {
       if (!ref.current) return;
-      var chart = createChart(ref.current, {
-        width: width,
-        height: HEIGHT,
-        layout: {
-          backgroundColor: "transparent",
-          textColor: textColor,
-        },
-        rightPriceScale: {
-          scaleMargins: {
-            top: topScale,
-            bottom: 0,
-          },
-          borderVisible: false,
-        },
-        timeScale: {
-          borderVisible: false,
-        },
-        grid: {
-          horzLines: {
-            color: "rgba(197, 203, 206, 0.5)",
-            visible: false,
-          },
-          vertLines: {
-            color: "rgba(197, 203, 206, 0.5)",
-            visible: false,
-          },
-        },
-        crosshair: {
-          horzLine: {
-            visible: false,
-            labelVisible: false,
-          },
-          vertLine: {
-            visible: true,
-            style: 0,
-            width: 2,
-            color: "rgba(32, 38, 46, 0.1)",
-            labelVisible: false,
-          },
-        },
-        localization: {
-          priceFormatter: (val: any) => val,
-        },
-      });
-
-      var series =
-        type === CHART_TYPES.BAR
-          ? chart.addHistogramSeries({
-              color: "#ff007a",
-              priceFormat: {
-                type: "volume",
-              },
-              scaleMargins: {
-                top: 0.32,
-                bottom: 0,
-              },
-              baseLineColor: "#ff007a",
-              baseLineWidth: 3,
-            })
-          : chart.addAreaSeries({
-              topColor: "#ff007a",
-              bottomColor: "rgba(255, 0, 122, 0)",
-              lineColor: "#ff007a",
-              lineWidth: 3,
-            });
-
-      series.setData(formattedData);
-      var toolTip = document.createElement("div");
-      toolTip.setAttribute("id", "tooltip-id" + type);
-      toolTip.className = darkMode
-        ? "three-line-legend-dark"
-        : "three-line-legend";
-      if (!ref.current) return;
-      ref.current?.appendChild(toolTip);
-      toolTip.style.display = "block";
-      toolTip.style.fontWeight = "500";
-      toolTip.style.left = -4 + "px";
-      toolTip.style.top = "-" + 8 + "px";
-      toolTip.style.backgroundColor = "transparent";
-
-      // format numbers
-      let percentChange = baseChange?.toFixed(2);
-      let formattedPercentChange =
-        (percentChange > 0 ? "+" : "") + percentChange + "%";
-      let color = percentChange >= 0 ? "green" : "red";
-
-      // get the title of the chart
-      toolTip.innerHTML =
-        `<div style="font-size: 16px; margin: 4px 0px; color: ${textColor};">${title} ${
-          type === CHART_TYPES.BAR && !useWeekly ? "(24hr)" : ""
-        }</div>` +
-        `<div style="font-size: 22px; margin: 4px 0px; color:${textColor}" >` +
-        base +
-        `<span style="margin-left: 10px; font-size: 16px; color: ${color};">${formattedPercentChange}</span>` +
-        "</div>";
-
+      // const chart = createChart(ref.current, {
+      //   width: width,
+      //   height: HEIGHT,
+      //   layout: {
+      //     backgroundColor: "transparent",
+      //     textColor: textColor,
+      //   },
+      //   rightPriceScale: {
+      //     scaleMargins: {
+      //       top: topScale,
+      //       bottom: 0,
+      //     },
+      //     borderVisible: false,
+      //   },
+      //   timeScale: {
+      //     borderVisible: false,
+      //   },
+      //   grid: {
+      //     horzLines: {
+      //       color: "rgba(197, 203, 206, 0.5)",
+      //       visible: false,
+      //     },
+      //     vertLines: {
+      //       color: "rgba(197, 203, 206, 0.5)",
+      //       visible: false,
+      //     },
+      //   },
+      //   crosshair: {
+      //     horzLine: {
+      //       visible: false,
+      //       labelVisible: false,
+      //     },
+      //     vertLine: {
+      //       visible: true,
+      //       style: 0,
+      //       width: 2,
+      //       color: "rgba(32, 38, 46, 0.1)",
+      //       labelVisible: false,
+      //     },
+      //   },
+      //   localization: {
+      //     priceFormatter: (val: any) => val,
+      //   },
+      // });
+      // const series =
+      //   type === CHART_TYPES.BAR
+      //     ? chart.addHistogramSeries({
+      //         color: "#ff007a",
+      //         priceFormat: {
+      //           type: "volume",
+      //         },
+      //         scaleMargins: {
+      //           top: 0.32,
+      //           bottom: 0,
+      //         },
+      //         baseLineColor: "#ff007a",
+      //         baseLineWidth: 3,
+      //       })
+      //     : chart.addAreaSeries({
+      //         topColor: "#ff007a",
+      //         bottomColor: "rgba(255, 0, 122, 0)",
+      //         lineColor: "#ff007a",
+      //         lineWidth: 3,
+      //       });
+      // series.setData(formattedData);
+      // const toolTip = document.createElement("div");
+      // toolTip.setAttribute("id", "tooltip-id" + type);
+      // toolTip.className = darkMode
+      //   ? "three-line-legend-dark"
+      //   : "three-line-legend";
+      // if (!ref.current) return;
+      // ref.current?.appendChild(toolTip);
+      // toolTip.style.display = "block";
+      // toolTip.style.fontWeight = "500";
+      // toolTip.style.left = -4 + "px";
+      // toolTip.style.top = "-" + 8 + "px";
+      // toolTip.style.backgroundColor = "transparent";
+      // // format numbers
+      // let percentChange = baseChange?.toFixed(2);
+      // let formattedPercentChange =
+      //   (percentChange > 0 ? "+" : "") + percentChange + "%";
+      // let color = percentChange >= 0 ? "green" : "red";
+      // // get the title of the chart
+      // toolTip.innerHTML =
+      //   `<div style="font-size: 16px; margin: 4px 0px; color: ${textColor};">${title} ${
+      //     type === CHART_TYPES.BAR && !useWeekly ? "(24hr)" : ""
+      //   }</div>` +
+      //   `<div style="font-size: 22px; margin: 4px 0px; color:${textColor}" >` +
+      //   base +
+      //   `<span style="margin-left: 10px; font-size: 16px; color: ${color};">${formattedPercentChange}</span>` +
+      //   "</div>";
       // update the title when hovering on the chart
-      chart.subscribeCrosshairMove(function (param: any) {
-        if (
-          param === undefined ||
-          param.time === undefined ||
-          param.point.x < 0 ||
-          param.point.x > width ||
-          param.point.y < 0 ||
-          param.point.y > HEIGHT
-        ) {
-          toolTip.innerHTML =
-            `<div style="font-size: 16px; margin: 4px 0px; color: ${textColor};">${title} ${
-              type === CHART_TYPES.BAR && !useWeekly ? "(24hr)" : ""
-            }</div>` +
-            `<div style="font-size: 22px; margin: 4px 0px; color:${textColor}" >` +
-            base +
-            `<span style="margin-left: 10px; font-size: 16px; color: ${color};">${formattedPercentChange}</span>` +
-            "</div>";
-        } else {
-          let dateStr = useWeekly
-            ? dayjs(
-                param.time.year + "-" + param.time.month + "-" + param.time.day
-              )
-                .startOf("week")
-                .format("MMMM D, YYYY") +
-              "-" +
-              dayjs(
-                param.time.year + "-" + param.time.month + "-" + param.time.day
-              )
-                .endOf("week")
-                .format("MMMM D, YYYY")
-            : dayjs(
-                param.time.year + "-" + param.time.month + "-" + param.time.day
-              ).format("MMMM D, YYYY");
-          var price = param.seriesPrices.get(series);
-
-          toolTip.innerHTML =
-            `<div style="font-size: 16px; margin: 4px 0px; color: ${textColor};">${title}</div>` +
-            `<div style="font-size: 22px; margin: 4px 0px; color: ${textColor}">` +
-            price +
-            "</div>" +
-            "<div>" +
-            dateStr +
-            "</div>";
-        }
-      });
-
-      chart.timeScale().fitContent();
-
-      setChartCreated(chart);
+      //   chart.subscribeCrosshairMove(function (param: any) {
+      //     if (
+      //       param === undefined ||
+      //       param.time === undefined ||
+      //       param.point.x < 0 ||
+      //       param.point.x > width ||
+      //       param.point.y < 0 ||
+      //       param.point.y > HEIGHT
+      //     ) {
+      //       toolTip.innerHTML =
+      //         `<div style="font-size: 16px; margin: 4px 0px; color: ${textColor};">${title} ${
+      //           type === CHART_TYPES.BAR && !useWeekly ? "(24hr)" : ""
+      //         }</div>` +
+      //         `<div style="font-size: 22px; margin: 4px 0px; color:${textColor}" >` +
+      //         base +
+      //         `<span style="margin-left: 10px; font-size: 16px; color: ${color};">${formattedPercentChange}</span>` +
+      //         "</div>";
+      //     } else {
+      //       let dateStr = useWeekly
+      //         ? dayjs(
+      //             param.time.year + "-" + param.time.month + "-" + param.time.day
+      //           )
+      //             .startOf("week")
+      //             .format("MMMM D, YYYY") +
+      //           "-" +
+      //           dayjs(
+      //             param.time.year + "-" + param.time.month + "-" + param.time.day
+      //           )
+      //             .endOf("week")
+      //             .format("MMMM D, YYYY")
+      //         : dayjs(
+      //             param.time.year + "-" + param.time.month + "-" + param.time.day
+      //           ).format("MMMM D, YYYY");
+      //       var price = param.seriesPrices.get(series);
+      //       toolTip.innerHTML =
+      //         `<div style="font-size: 16px; margin: 4px 0px; color: ${textColor};">${title}</div>` +
+      //         `<div style="font-size: 22px; margin: 4px 0px; color: ${textColor}">` +
+      //         price +
+      //         "</div>" +
+      //         "<div>" +
+      //         dateStr +
+      //         "</div>";
+      //     }
+      //   });
+      //   chart.timeScale().fitContent();
+      //   setChartCreated(chart);
     }
   }, [
     base,
@@ -247,13 +239,30 @@ const TradingViewChart = ({
     }
   }, [chartCreated, width]);
 
+  useEffect(() => {
+    // const chart = createChart(ref.current, { width: 400, height: 300 });
+    // const lineSeries = chart.addLineSeries();
+    // lineSeries.setData([
+    //   { time: "2019-04-11", value: 80.01 },
+    //   { time: "2019-04-12", value: 96.63 },
+    //   { time: "2019-04-13", value: 76.64 },
+    //   { time: "2019-04-14", value: 81.89 },
+    //   { time: "2019-04-15", value: 74.43 },
+    //   { time: "2019-04-16", value: 80.01 },
+    //   { time: "2019-04-17", value: 96.63 },
+    //   { time: "2019-04-18", value: 76.64 },
+    //   { time: "2019-04-19", value: 81.89 },
+    //   { time: "2019-04-20", value: 74.43 },
+    // ]);
+  }, []);
+
   return (
     <Box style={{ position: "relative" }}>
-      <Box ref={ref.current} id={"test-id" + type} />
+      <div ref={ref} id={"test-id" + type} />
       <Icon
-        onClick={() => {
-          chartCreated && chartCreated.timeScale().fitContent();
-        }}
+        // onClick={() => {
+        //   chartCreated && chartCreated.timeScale().fitContent();
+        // }}
         as={FiPlay}
       />
     </Box>

@@ -669,7 +669,10 @@ const getTokenChartData = async (tokenAddress) => {
       // add the day index to the set of days
       dayIndexSet.add((data[i].date / oneDay).toFixed(0));
       dayIndexArray.push(data[i]);
-      dayData.dailyVolumeUSD = parseFloat(dayData.dailyVolumeUSD);
+      dayData = {
+        ...dayData,
+        dailyVolumeUSD: parseFloat(dayData.dailyVolumeUSD),
+      };
     });
 
     // fill in empty days
