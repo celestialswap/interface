@@ -494,6 +494,7 @@ const getEthPrice = async () => {
     .subtract(1, "day")
     .startOf("minute")
     .unix();
+  console.log("utcOneDayBack", utcOneDayBack);
 
   let ethPrice = 0;
   let ethPriceOneDay = 0;

@@ -92,7 +92,7 @@ const Swap: NextPage = () => {
   const [tokensNeedApproved, setTokensNeedApproved] = useState<Token[]>([]);
   const [trade, setTrade] = useState<Trade | null>(null);
   const [slippage, setSlippage] = useState<string>("0.5");
-  const [disabledMultihops, setDisabledMultihops] = useState<boolean>(true);
+  const [disabledMultihops, setDisabledMultihops] = useState<boolean>(false);
   const [loadedPool, setLoadedPool] = useState<boolean>(false);
   const [isCheckedHighPriceImpact, setIsCheckedHighPriceImpact] =
     useState<boolean>(false);
@@ -279,6 +279,7 @@ const Swap: NextPage = () => {
       await swapCallback(library, account, trade, +slippage);
       setReloadPool((pre) => !pre);
       setSubmitting(false);
+      setTypedValue("");
     } catch (error) {
       console.error(error);
       setSubmitting(false);
@@ -526,7 +527,7 @@ const Swap: NextPage = () => {
               <Box>Multihops</Box>
               <Switch
                 bg="#0a2d74b3"
-                isChecked={disabledMultihops}
+                isChecked={!disabledMultihops}
                 onChange={(_) => setDisabledMultihops((pre) => !pre)}
               />
             </Box>
@@ -562,7 +563,7 @@ const Swap: NextPage = () => {
                   <Icon w="4" h="4" as={IoIosArrowDown} />
                 </VStack>
               </HStack>
-              <Box pos="relative">
+              <Box pos="relative" flex="1">
                 <Input
                   type="number"
                   border="none"
@@ -665,7 +666,7 @@ const Swap: NextPage = () => {
                   <Icon w="4" h="4" as={IoIosArrowDown} />
                 </VStack>
               </HStack>
-              <Box pos="relative">
+              <Box pos="relative" flex="1">
                 <Input
                   type="number"
                   border="none"

@@ -1,5 +1,5 @@
 import { gql } from "@apollo/client";
-import { FACTORY_ADDRESS, BUNDLE_ID } from "@/configs/info";
+import { FACTORY_ADDRESS, BUNDLE_ID } from "@/configs/networks";
 
 export const SUBGRAPH_HEALTH = gql`
   query health {

@@ -24,7 +24,7 @@ import {
   getLPReturnsOnPair,
   getHistoricalPairReturns,
 } from "@/utils/info/returns";
-import { timeframeOptions } from "@/configs/info";
+import { timeframeOptions } from "@/configs/networks";
 
 dayjs.extend(utc);
 
