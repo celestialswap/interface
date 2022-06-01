@@ -1,7 +1,7 @@
 import { ApolloClient, InMemoryCache } from "@apollo/client";
 
 export const client = new ApolloClient({
-  uri: "http://localhost:8000/subgraphs/name/nodemdev/subgraph-example",
+  uri: "https://api.thegraph.com/subgraphs/name/ianlapham/uniswapv2",
   cache: new InMemoryCache(),
   shouldBatch: true,
 });

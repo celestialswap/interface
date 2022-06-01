@@ -1,5 +1,6 @@
 import { gql } from "@apollo/client";
-import { FACTORY_ADDRESS, BUNDLE_ID } from "@/configs/networks";
+import { BUNDLE_ID } from "@/configs/networks";
+const FACTORY_ADDRESS = "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f"; // TODO change follow config
 
 export const SUBGRAPH_HEALTH = gql`
   query health {

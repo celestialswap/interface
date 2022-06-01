@@ -18,16 +18,6 @@ const Info: NextPage = () => {
     liquidityChangeUSD,
   } = useGlobalData();
 
-  // console.log(
-  //   allPairs,
-  //   allTokens,
-  //   transactions,
-  //   totalLiquidityUSD,
-  //   oneDayVolumeUSD,
-  //   volumeChangeUSD,
-  //   liquidityChangeUSD
-  // );
-
   return (
     <Box>
       <GlobalChart display="liquidity" />

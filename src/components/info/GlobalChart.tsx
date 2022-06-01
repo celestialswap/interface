@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import { ResponsiveContainer } from "recharts";
-import { timeframeOptions } from "@/configs/info";
+import { timeframeOptions } from "@/configs/networks";
 import { useGlobalChartData, useGlobalData } from "@/contexts/GlobalData";
 import { useMedia } from "react-use";
 // import DropdownSelect from "../DropdownSelect";
@@ -10,7 +10,6 @@ import { Box, Button } from "@chakra-ui/react";
 import dynamic from "next/dynamic";
 
 const TradingViewChart = dynamic(() => import("./TradingviewChart"), {
-  loading: () => <p>Loading ...</p>,
   ssr: false,
 });
 
