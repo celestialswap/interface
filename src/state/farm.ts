@@ -1,15 +1,15 @@
-import { NETWORKS_SUPPORTED } from "@/configs/networks";
+import { NETWORKS_SUPPORTED } from '@/configs/networks';
 import {
   callContract,
   getERC20Contract,
   getMasterChiefContract,
   getPairContract,
-} from "@/hooks/useContract";
-import { getSingleContractMultipleDataMultipleMethods } from "@/utils/muticall";
-import { BigNumber } from "@ethersproject/bignumber";
-import { Web3Provider } from "@ethersproject/providers";
-import { formatEther } from "@ethersproject/units";
-import { Token, TokenAmount } from "@uniswap/sdk";
+} from '@/hooks/useContract';
+import { getSingleContractMultipleDataMultipleMethods } from '@/utils/muticall';
+import { BigNumber } from '@ethersproject/bignumber';
+import { Web3Provider } from '@ethersproject/providers';
+import { formatEther } from '@ethersproject/units';
+import { Token, TokenAmount } from '@uniswap/sdk';
 
 export interface FarmPool {
   lpToken: Token;
@@ -39,7 +39,7 @@ export const getFarmPoolLength = async (
     const masterChiefContract = getMasterChiefContract(library);
     const poolLength = await callContract(
       masterChiefContract,
-      "poolLength",
+      'poolLength',
       []
     );
     return parseInt(poolLength.toString(), 10);
@@ -55,24 +55,24 @@ export const getPool = async (
 ): Promise<FarmPool> => {
   try {
     const masterChiefContract = getMasterChiefContract(library);
-    const poolInfo = await callContract(masterChiefContract, "poolInfo", [pid]);
-    if (!poolInfo.lpToken) throw Error("invalid farm pool");
+    const poolInfo = await callContract(masterChiefContract, 'poolInfo', [pid]);
+    if (!poolInfo.lpToken) throw Error('invalid farm pool');
     const pairContract = getPairContract(poolInfo.lpToken, library);
     const [token0, token1] = await Promise.all([
-      callContract(pairContract, "token0", []),
-      callContract(pairContract, "token1", []),
+      callContract(pairContract, 'token0', []),
+      callContract(pairContract, 'token1', []),
     ]);
     const [_token0, _token1] = await Promise.all(
       [token0, token1].map(async (token) => {
         const erc20Contract = getERC20Contract(token, library);
-        const erc20Methods = ["name", "symbol", "decimals"];
+        const erc20Methods = ['name', 'symbol', 'decimals'];
         const results = await getSingleContractMultipleDataMultipleMethods(
           library,
           erc20Contract,
           erc20Methods,
           erc20Methods.map((_) => [])
         );
-        if (!results?.length) throw Error("invalid pair");
+        if (!results?.length) throw Error('invalid pair');
         const _token = results.reduce((memo, result, i) => {
           if (result?.[0]) memo[erc20Methods[i]] = result[0];
           return memo;
@@ -82,14 +82,14 @@ export const getPool = async (
             new Set([...Object.keys(_token), ...erc20Methods]).values()
           ).length !== erc20Methods.length
         )
-          throw Error("invalid pair");
+          throw Error('invalid pair');
 
         return new Token(
           NETWORKS_SUPPORTED.chainId,
           token,
-          _token["decimals"],
-          _token["symbol"],
-          _token["name"]
+          _token['decimals'],
+          _token['symbol'],
+          _token['name']
         );
       })
     );
@@ -97,9 +97,9 @@ export const getPool = async (
     let pendingReward, userInfo, lpBalance;
     if (account) {
       [pendingReward, userInfo, lpBalance] = await Promise.all([
-        callContract(masterChiefContract, "pendingStar", [pid, account]),
-        callContract(masterChiefContract, "userInfo", [pid, account]),
-        callContract(pairContract, "balanceOf", [account]),
+        callContract(masterChiefContract, 'pendingStar', [pid, account]),
+        callContract(masterChiefContract, 'userInfo', [pid, account]),
+        callContract(pairContract, 'balanceOf', [account]),
       ]);
     }
     const _lpToken = new Token(
@@ -118,7 +118,7 @@ export const getPool = async (
       lastRewardTime: poolInfo.lastRewardTime,
       pendingReward,
       userInfo,
-      lpBalance: new TokenAmount(_lpToken, lpBalance),
+      lpBalance: lpBalance ? new TokenAmount(_lpToken, lpBalance) : undefined,
     };
   } catch (error) {
     throw error;
@@ -135,7 +135,7 @@ export const startFarming = async (
   try {
     if (!amount) return;
     const masterChiefContract = getMasterChiefContract(library, account);
-    return callContract(masterChiefContract, "deposit", [
+    return callContract(masterChiefContract, 'deposit', [
       pid,
       amount.raw.toString(),
       lockTime,
@@ -154,7 +154,7 @@ export const harvest = async (
   try {
     if (!amount) return;
     const masterChiefContract = getMasterChiefContract(library, account);
-    return callContract(masterChiefContract, "withdraw", [pid, 0]);
+    return callContract(masterChiefContract, 'withdraw', [pid, 0]);
   } catch (error) {
     throw error;
   }

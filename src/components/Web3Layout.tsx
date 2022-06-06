@@ -1,8 +1,8 @@
-import { useActiveWeb3React } from "@/hooks/useActiveWeb3React";
-import { useEagerConnect } from "@/hooks/useEagerConnect";
-import { useInactiveListener } from "@/hooks/useInactiveListener";
-import { useWallet } from "@/hooks/useWallet";
-import { injected, walletconnect } from "@/utils/web3React";
+import { useActiveWeb3React } from '@/hooks/useActiveWeb3React';
+import { useEagerConnect } from '@/hooks/useEagerConnect';
+import { useInactiveListener } from '@/hooks/useInactiveListener';
+import { useWallet } from '@/hooks/useWallet';
+import { injected, walletconnect } from '@/utils/web3React';
 import {
   Box,
   Button,
@@ -23,34 +23,34 @@ import {
   DrawerOverlay,
   DrawerContent,
   DrawerBody,
-} from "@chakra-ui/react";
-import Image from "next/image";
-import Link from "next/link";
-import React, { useEffect, useState } from "react";
-import { formatAddress } from "../utils";
-import { CgFileDocument } from "react-icons/cg";
+} from '@chakra-ui/react';
+import Image from 'next/image';
+import Link from 'next/link';
+import React, { useEffect, useState } from 'react';
+import { formatAddress } from '../utils';
+import { CgFileDocument } from 'react-icons/cg';
 import {
   IoMdSettings,
   IoIosArrowForward,
   IoMdGitNetwork,
-} from "react-icons/io";
-import { RiFeedbackFill } from "react-icons/ri";
-import { AiOutlineMenu, AiOutlineSwap } from "react-icons/ai";
-import { GiFarmTractor } from "react-icons/gi";
-import { FiGrid, FiCommand } from "react-icons/fi";
-import useCurrentRoute from "@/hooks/useCurrentRoute";
-import { APP_ROUTE } from "../configs";
+} from 'react-icons/io';
+import { RiFeedbackFill } from 'react-icons/ri';
+import { AiOutlineMenu, AiOutlineSwap } from 'react-icons/ai';
+import { GiFarmTractor } from 'react-icons/gi';
+import { FiGrid, FiCommand } from 'react-icons/fi';
+import useCurrentRoute from '@/hooks/useCurrentRoute';
+import { APP_ROUTE } from '../configs';
 
 const connectors = [
   {
-    name: "Metamask",
+    name: 'Metamask',
     connector: injected,
-    icon: "/images/metamask.svg",
+    icon: '/images/metamask.svg',
   },
   {
-    name: "WalletConnect",
+    name: 'WalletConnect',
     connector: walletconnect,
-    icon: "/images/walletconnect.svg",
+    icon: '/images/walletconnect.svg',
   },
 ];
 
@@ -104,7 +104,7 @@ const Web3Layout = ({ children }: { children: any }) => {
                   key={idx}
                   py={4}
                   justify="center"
-                  _hover={{ bg: "gray.200", cursor: "pointer", opacity: 0.4 }}
+                  _hover={{ bg: 'gray.200', cursor: 'pointer', opacity: 0.4 }}
                   borderRadius="3xl"
                   onClick={() => connect(connector.connector)}
                 >
@@ -141,15 +141,15 @@ const Web3Layout = ({ children }: { children: any }) => {
                   borderRadius="3xl"
                   bg={
                     currentRoute === APP_ROUTE.SWAP
-                      ? "rgba(0, 173, 238, 0.6)"
-                      : ""
+                      ? 'rgba(0, 173, 238, 0.6)'
+                      : ''
                   }
                   _hover={{
-                    cursor: "pointer",
+                    cursor: 'pointer',
                     bg:
                       currentRoute === APP_ROUTE.SWAP
-                        ? "rgba(0, 173, 238, 0.6)"
-                        : "rgba(0, 173, 238, 0.2)",
+                        ? 'rgba(0, 173, 238, 0.6)'
+                        : 'rgba(0, 173, 238, 0.2)',
                   }}
                 >
                   <HStack>
@@ -165,15 +165,15 @@ const Web3Layout = ({ children }: { children: any }) => {
                   borderRadius="3xl"
                   bg={
                     currentRoute === APP_ROUTE.ADD_LIQUIDITY
-                      ? "rgba(0, 173, 238, 0.6)"
-                      : ""
+                      ? 'rgba(0, 173, 238, 0.6)'
+                      : ''
                   }
                   _hover={{
-                    cursor: "pointer",
+                    cursor: 'pointer',
                     bg:
                       currentRoute === APP_ROUTE.ADD_LIQUIDITY
-                        ? "rgba(0, 173, 238, 0.6)"
-                        : "rgba(0, 173, 238, 0.2)",
+                        ? 'rgba(0, 173, 238, 0.6)'
+                        : 'rgba(0, 173, 238, 0.2)',
                   }}
                 >
                   <HStack>
@@ -189,15 +189,15 @@ const Web3Layout = ({ children }: { children: any }) => {
                   borderRadius="3xl"
                   bg={
                     currentRoute === APP_ROUTE.LIQUIDITY
-                      ? "rgba(0, 173, 238, 0.6)"
-                      : ""
+                      ? 'rgba(0, 173, 238, 0.6)'
+                      : ''
                   }
                   _hover={{
-                    cursor: "pointer",
+                    cursor: 'pointer',
                     bg:
                       currentRoute === APP_ROUTE.LIQUIDITY
-                        ? "rgba(0, 173, 238, 0.6)"
-                        : "rgba(0, 173, 238, 0.2)",
+                        ? 'rgba(0, 173, 238, 0.6)'
+                        : 'rgba(0, 173, 238, 0.2)',
                   }}
                 >
                   <HStack>
@@ -213,15 +213,15 @@ const Web3Layout = ({ children }: { children: any }) => {
                   borderRadius="3xl"
                   bg={
                     currentRoute === APP_ROUTE.FARM
-                      ? "rgba(0, 173, 238, 0.6)"
-                      : ""
+                      ? 'rgba(0, 173, 238, 0.6)'
+                      : ''
                   }
                   _hover={{
-                    cursor: "pointer",
+                    cursor: 'pointer',
                     bg:
                       currentRoute === APP_ROUTE.FARM
-                        ? "rgba(0, 173, 238, 0.6)"
-                        : "rgba(0, 173, 238, 0.2)",
+                        ? 'rgba(0, 173, 238, 0.6)'
+                        : 'rgba(0, 173, 238, 0.2)',
                   }}
                 >
                   <HStack>
@@ -255,17 +255,17 @@ const Web3Layout = ({ children }: { children: any }) => {
             cursor="pointer"
             ref={ref.current}
             onClick={onOpenMenu}
-            display={{ base: "block", lg: "none" }}
+            display={{ base: 'block', lg: 'none' }}
           />
 
           <ChakraImage
-            display={{ base: "none", lg: "block" }}
+            display={{ base: 'none', lg: 'block' }}
             src="/images/logo.png"
             w="12em"
             h="12em"
           />
           <ChakraImage
-            display={{ base: "block", lg: "none" }}
+            display={{ base: 'block', lg: 'none' }}
             src="/images/logo-mini.png"
             w="4.5em"
             h="4.5em"
@@ -280,7 +280,7 @@ const Web3Layout = ({ children }: { children: any }) => {
           py="2"
           cursor="pointer"
         >
-          {account ? formatAddress(account) : "connect wallet"}
+          {account ? formatAddress(account) : 'Connect wallet'}
         </Box>
       </HStack>
       <Box
@@ -293,7 +293,7 @@ const Web3Layout = ({ children }: { children: any }) => {
         px="4"
         zIndex="2"
         fontWeight="bold"
-        display={{ base: "none", lg: "block" }}
+        display={{ base: 'none', lg: 'block' }}
         bg="rgba(0, 173, 238, 0.1)"
         color="white"
       >
@@ -313,15 +313,15 @@ const Web3Layout = ({ children }: { children: any }) => {
                 borderRadius="3xl"
                 bg={
                   currentRoute === APP_ROUTE.SWAP
-                    ? "rgba(0, 173, 238, 0.6)"
-                    : ""
+                    ? 'rgba(0, 173, 238, 0.6)'
+                    : ''
                 }
                 _hover={{
-                  cursor: "pointer",
+                  cursor: 'pointer',
                   bg:
                     currentRoute === APP_ROUTE.SWAP
-                      ? "rgba(0, 173, 238, 0.6)"
-                      : "rgba(0, 173, 238, 0.2)",
+                      ? 'rgba(0, 173, 238, 0.6)'
+                      : 'rgba(0, 173, 238, 0.2)',
                 }}
               >
                 <HStack>
@@ -337,15 +337,15 @@ const Web3Layout = ({ children }: { children: any }) => {
                 borderRadius="3xl"
                 bg={
                   currentRoute === APP_ROUTE.ADD_LIQUIDITY
-                    ? "rgba(0, 173, 238, 0.6)"
-                    : ""
+                    ? 'rgba(0, 173, 238, 0.6)'
+                    : ''
                 }
                 _hover={{
-                  cursor: "pointer",
+                  cursor: 'pointer',
                   bg:
                     currentRoute === APP_ROUTE.ADD_LIQUIDITY
-                      ? "rgba(0, 173, 238, 0.6)"
-                      : "rgba(0, 173, 238, 0.2)",
+                      ? 'rgba(0, 173, 238, 0.6)'
+                      : 'rgba(0, 173, 238, 0.2)',
                 }}
               >
                 <HStack>
@@ -361,15 +361,15 @@ const Web3Layout = ({ children }: { children: any }) => {
                 borderRadius="3xl"
                 bg={
                   currentRoute === APP_ROUTE.LIQUIDITY
-                    ? "rgba(0, 173, 238, 0.6)"
-                    : ""
+                    ? 'rgba(0, 173, 238, 0.6)'
+                    : ''
                 }
                 _hover={{
-                  cursor: "pointer",
+                  cursor: 'pointer',
                   bg:
                     currentRoute === APP_ROUTE.LIQUIDITY
-                      ? "rgba(0, 173, 238, 0.6)"
-                      : "rgba(0, 173, 238, 0.2)",
+                      ? 'rgba(0, 173, 238, 0.6)'
+                      : 'rgba(0, 173, 238, 0.2)',
                 }}
               >
                 <HStack>
@@ -385,15 +385,15 @@ const Web3Layout = ({ children }: { children: any }) => {
                 borderRadius="3xl"
                 bg={
                   currentRoute === APP_ROUTE.FARM
-                    ? "rgba(0, 173, 238, 0.6)"
-                    : ""
+                    ? 'rgba(0, 173, 238, 0.6)'
+                    : ''
                 }
                 _hover={{
-                  cursor: "pointer",
+                  cursor: 'pointer',
                   bg:
                     currentRoute === APP_ROUTE.FARM
-                      ? "rgba(0, 173, 238, 0.6)"
-                      : "rgba(0, 173, 238, 0.2)",
+                      ? 'rgba(0, 173, 238, 0.6)'
+                      : 'rgba(0, 173, 238, 0.2)',
                 }}
               >
                 <HStack>
@@ -425,8 +425,8 @@ const Web3Layout = ({ children }: { children: any }) => {
               py="3"
               borderRadius="3xl"
               _hover={{
-                cursor: "pointer",
-                bg: "rgba(0, 173, 238, 0.3)",
+                cursor: 'pointer',
+                bg: 'rgba(0, 173, 238, 0.3)',
               }}
             >
               <HStack>
@@ -439,8 +439,8 @@ const Web3Layout = ({ children }: { children: any }) => {
               py="3"
               borderRadius="3xl"
               _hover={{
-                cursor: "pointer",
-                bg: "rgba(0, 173, 238, 0.3)",
+                cursor: 'pointer',
+                bg: 'rgba(0, 173, 238, 0.3)',
               }}
             >
               <HStack>

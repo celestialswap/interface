@@ -1,15 +1,15 @@
-import Pool from "@/components/liquidity/Pool";
-import { APP_ROUTE } from "@/configs/index";
-import { useActiveWeb3React } from "@/hooks/useActiveWeb3React";
-import { getOwnerLiquidityPools, PoolState } from "@/state/liquidity";
-import { Box, Button, Grid, HStack, Icon, VStack } from "@chakra-ui/react";
-import type { NextPage } from "next";
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import useCurrentRoute from "@/hooks/useCurrentRoute";
-import { AiOutlineSwap } from "react-icons/ai";
-import { IoAdd } from "react-icons/io5";
-import { BiMinus } from "react-icons/bi";
+import Pool from '@/components/liquidity/Pool';
+import { APP_ROUTE } from '@/configs/index';
+import { useActiveWeb3React } from '@/hooks/useActiveWeb3React';
+import { getOwnerLiquidityPools, PoolState } from '@/state/liquidity';
+import { Box, Button, Grid, HStack, Icon, VStack } from '@chakra-ui/react';
+import type { NextPage } from 'next';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import useCurrentRoute from '@/hooks/useCurrentRoute';
+import { AiOutlineSwap } from 'react-icons/ai';
+import { IoAdd } from 'react-icons/io5';
+import { BiMinus } from 'react-icons/bi';
 
 const Liquidity: NextPage = () => {
   const { account, library } = useActiveWeb3React();
@@ -51,8 +51,8 @@ const Liquidity: NextPage = () => {
               cursor="pointer"
               bgImage={
                 currentRoute === APP_ROUTE.SWAP
-                  ? "linear-gradient(90deg,#00ADEE,#24CBFF)"
-                  : ""
+                  ? 'linear-gradient(90deg,#00ADEE,#24CBFF)'
+                  : ''
               }
               px="4"
               py="2"
@@ -70,8 +70,8 @@ const Liquidity: NextPage = () => {
               cursor="pointer"
               bgImage={
                 currentRoute === APP_ROUTE.LIQUIDITY
-                  ? "linear-gradient(90deg,#00ADEE,#24CBFF)"
-                  : ""
+                  ? 'linear-gradient(90deg,#00ADEE,#24CBFF)'
+                  : ''
               }
               px="4"
               py="2"
@@ -87,7 +87,7 @@ const Liquidity: NextPage = () => {
 
         <VStack
           align="stretch"
-          w={{ base: "100%", lg: "24em" }}
+          w={{ base: '100%', lg: '24em' }}
           bg="#0a2d74b3"
           border="2px solid #00ADEE"
           p="6"
@@ -144,6 +144,8 @@ const Liquidity: NextPage = () => {
           <Box color="white">
             {loading ? (
               <Box>Loading...</Box>
+            ) : account ? (
+              <Box>Connect wallet</Box>
             ) : ownerPools.length ? (
               <VStack align="stretch">
                 {ownerPools.map((pool, i) => (

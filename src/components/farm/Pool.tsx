@@ -1,7 +1,7 @@
-import { MASTER_CHIEF_ADDRESS } from "@/configs/networks";
-import { useActiveWeb3React } from "@/hooks/useActiveWeb3React";
-import { approves, getAllowances } from "@/state/erc20";
-import { FarmPool, getPool, harvest, startFarming } from "@/state/farm";
+import { MASTER_CHIEF_ADDRESS } from '@/configs/networks';
+import { useActiveWeb3React } from '@/hooks/useActiveWeb3React';
+import { approves, getAllowances } from '@/state/erc20';
+import { FarmPool, getPool, harvest, startFarming } from '@/state/farm';
 import {
   Box,
   Button,
@@ -27,17 +27,17 @@ import {
   Tooltip,
   useDisclosure,
   VStack,
-} from "@chakra-ui/react";
-import { BigNumber } from "@ethersproject/bignumber";
+} from '@chakra-ui/react';
+import { BigNumber } from '@ethersproject/bignumber';
 import {
   formatEther,
   formatUnits,
   parseEther,
   parseUnits,
-} from "@ethersproject/units";
-import { Token, TokenAmount } from "@uniswap/sdk";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
+} from '@ethersproject/units';
+import { Token, TokenAmount } from '@uniswap/sdk';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { IoIosArrowDown, IoIosArrowUp } from 'react-icons/io';
 
 const Pool = ({ pid }: { pid: number }) => {
   const { account, library } = useActiveWeb3React();
@@ -109,7 +109,7 @@ const Pool = ({ pid }: { pid: number }) => {
       onClose();
     } catch (error: any) {
       console.error(error);
-      typeof error.data?.message === "string" && alert(error.data.message);
+      typeof error.data?.message === 'string' && alert(error.data.message);
       onClose();
       setSubmitting(false);
     }
@@ -124,7 +124,7 @@ const Pool = ({ pid }: { pid: number }) => {
       setHarvesting(false);
     } catch (error: any) {
       console.error(error);
-      typeof error.data?.message === "string" && alert(error.data.message);
+      typeof error.data?.message === 'string' && alert(error.data.message);
       setHarvesting(false);
     }
   }, [account, library, pid, pool]);
@@ -165,7 +165,7 @@ const Pool = ({ pid }: { pid: number }) => {
                   border="none"
                   borderRadius="3xl"
                   placeholder="enter an amount"
-                  value={farmingAmount?.toSignificant(10) ?? ""}
+                  value={farmingAmount?.toSignificant(10) ?? ''}
                   onChange={(e) => {
                     if (!e.target.value) return setFarmingAmount(undefined);
                     if (!pool.lpBalance) return;
@@ -229,7 +229,7 @@ const Pool = ({ pid }: { pid: number }) => {
                     _focus={{}}
                     borderRadius="3xl"
                   >
-                    {isNeedApproved ? "approve lp token" : "start farming"}
+                    {isNeedApproved ? 'approve lp token' : 'start farming'}
                   </Button>
                 </Box>
               </VStack>
@@ -257,7 +257,7 @@ const Pool = ({ pid }: { pid: number }) => {
                   pool.lpToken,
                   pool.pendingReward.toString()
                 ).toSignificant(8)
-              : "0"}
+              : '0'}
           </GridItem>
           <GridItem colSpan={4}>--</GridItem>
           <GridItem colSpan={4}>--</GridItem>
@@ -284,7 +284,7 @@ const Pool = ({ pid }: { pid: number }) => {
                             pool.lpToken,
                             pool.userInfo.amount.toString()
                           ).toSignificant(8)
-                        : "0"}
+                        : '0'}
                     </Box>
                   </VStack>
                   <Button
@@ -296,7 +296,7 @@ const Pool = ({ pid }: { pid: number }) => {
                     borderRadius="3xl"
                     _active={{}}
                   >
-                    start farming
+                    {account ? 'Start farming' : 'Connect wallet'}
                   </Button>
                 </HStack>
               </GridItem>
@@ -310,7 +310,7 @@ const Pool = ({ pid }: { pid: number }) => {
                             pool.lpToken,
                             pool.pendingReward.toString()
                           ).toSignificant(8)
-                        : "0"}{" "}
+                        : '0'}{' '}
                       RAY
                     </Box>
                   </VStack>
@@ -325,7 +325,7 @@ const Pool = ({ pid }: { pid: number }) => {
                     borderRadius="3xl"
                     _active={{}}
                   >
-                    harvest
+                    {account ? 'Harvest' : 'Connect wallet'}
                   </Button>
                 </HStack>
               </GridItem>
